@@ -1,3 +1,5 @@
+import { runPythonAnalysis } from "../services/pythonService.js";
+
 export const uploadFile = async (req, res) => {
     try {
         if (!req.file) {
@@ -7,11 +9,14 @@ export const uploadFile = async (req, res) => {
                 message: "No File uploaded",
             });
         }
+        const analysis = await runPythonAnalysis(req.file.path);
+
         console.log("File uploaded successfully:", req.file.path);
         res.status(200).json({
             success: true,
             message: "File Uploaded Sucessfully",
-            filePath: req.file.path
+            filePath: req.file.path,
+            analysis
         })
     } catch (error) {
         console.error("Error during file upload:", error.message);
