@@ -3,32 +3,33 @@ import path from "path";
 
 export const runPythonAnalysis = (filePath) => {
   return new Promise((resolve, reject) => {
-
-    // ✅ absolute paths (IMPORTANT)
     const scriptPath = path.resolve("../ai-agent/analyze.py");
-
-    // ✅ use venv python
     const pythonPath = path.resolve("../ai-agent/venv/Scripts/python.exe");
 
     const process = spawn(pythonPath, [scriptPath, filePath]);
 
     let result = "";
+    let errorOutput = "";
 
     process.stdout.on("data", (data) => {
       result += data.toString();
     });
 
     process.stderr.on("data", (data) => {
-      console.error(`Python Error: ${data}`);
+      errorOutput += data.toString();
     });
 
-    process.on("close", () => {
+    process.on("close", (code) => {
+      if (code !== 0) {
+        return reject(new Error(errorOutput || "Python process failed"));
+      }
+
       try {
-        resolve(JSON.parse(result));
-      } catch (error) {
-        reject(error);
+        const parsed = JSON.parse(result);
+        resolve(parsed);
+      } catch (err) {
+        reject(new Error("Invalid JSON from Python"));
       }
     });
-
   });
 };

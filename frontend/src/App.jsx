@@ -1,41 +1,31 @@
-import { Container, Typography, Box, Divider } from "@mui/material";
 import { useState } from "react";
+import Layout from "./components/Layout";
 import FileUpload from "./components/FileUpload";
 import Dashboard from "./components/Dashboard";
 
 function App() {
   const [data, setData] = useState(null);
+  const [activePage, setActivePage] = useState("upload");
 
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "100vh", py: 4 }}>
-      
-      <Container maxWidth="lg">
+    <Layout
+      activePage={activePage}
+      onPageChange={setActivePage}
+      hasData={!!data}
+    >
+      {activePage === "upload" && (
+        <FileUpload
+          setData={(res) => {
+            setData(res);
+            setActivePage("dashboard"); // auto switch
+          }}
+        />
+      )}
 
-        {/* 🔝 Header */}
-        <Box textAlign="center" mb={4}>
-          <Typography variant="h4" fontWeight={600}>
-            AI Data Analyst
-          </Typography>
-          <Typography variant="body2" color="text.secondary" mt={1}>
-            Upload your dataset and get instant insights
-          </Typography>
-        </Box>
-
-        <Divider sx={{ mb: 4 }} />
-
-        {/* 📂 Upload Section */}
-        <FileUpload setData={setData} />
-
-        {/* 📊 Dashboard Section */}
-        {data && (
-          <>
-            <Divider sx={{ my: 4 }} />
-            <Dashboard data={data} />
-          </>
-        )}
-
-      </Container>
-    </Box>
+      {activePage === "dashboard" && data && (
+        <Dashboard data={data} />
+      )}
+    </Layout>
   );
 }
 
