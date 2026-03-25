@@ -1,7 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import uploadRoutes from './routes/uploadRoutes.js';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 
@@ -12,15 +12,15 @@ app.use(cors());
 app.use(express.json());
 
 // routes
-app.use('/api/upload', uploadRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // test route
-app.get('/', (req, res) => {
-    res.send("API is runing...");
-})
+app.get("/", (req, res) => {
+  res.send("API is running...");
+});
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`server is runing on port: ${PORT}`);
-})
+  console.log(`Server running on port: ${PORT}`);
+});
