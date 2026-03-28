@@ -343,7 +343,7 @@ const Dashboard = ({ data }) => {
               {/* AI INSIGHTS */}
               {data.insights && (
                 <Box>
-                  <SectionLabel icon="🤖">AI Insights</SectionLabel>
+                  <SectionLabel>AI Insights</SectionLabel>
                   <Box
                     sx={{
                       bgcolor: T.surface,
