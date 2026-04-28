@@ -319,68 +319,95 @@ const Dashboard = ({ data }) => {
             </Box>
           </Grid>
 
-          {/* RIGHT COLUMN — charts + insights */}
-          <Grid item xs={12} lg={5}>
-            <Box display="flex" flexDirection="column" gap={4} sx={{ position: { lg: "sticky" }, top: { lg: 24 } }}>
+         {/* ── MAIN BODY: Full Width Layout ── */}
+<Box px={{ xs: 2, md: 6 }}>
+  <Grid container spacing={3}>
 
-              {/* CHARTS */}
-              <Box>
-                <SectionLabel icon="📊">Visualizations</SectionLabel>
-                <Box
-                  sx={{
-                    bgcolor: T.surface,
-                    border: `1px solid ${T.border}`,
-                    borderRadius: "16px",
-                    p: { xs: 2, md: 3 },
-                    boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
-                    "& canvas": { borderRadius: "8px" },
-                  }}
-                >
-                  <Charts charts={data.charts} />
-                </Box>
-              </Box>
+    {/* ROW 1: DATA PREVIEW & COLUMN ANALYSIS (LEFT) */}
+    <Grid item xs={12} lg={8}>
+      <Box display="flex" flexDirection="column" gap={4}>
+        {/* DATA PREVIEW SECTION */}
+        {data.preview && (
+          <Box>
+            <SectionLabel icon="🗂">Data Preview</SectionLabel>
+            {/* ... your existing TextField and Table Box code ... */}
+          </Box>
+        )}
 
-              {/* AI INSIGHTS */}
-              {data.insights && (
-                <Box>
-                  <SectionLabel>AI Insights</SectionLabel>
-                  <Box
-                    sx={{
-                      bgcolor: T.surface,
-                      border: `1px solid ${T.border}`,
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
-                      position: "relative",
-                    }}
-                  >
-                    {/* colored top strip */}
-                    <Box sx={{ height: 3, background: `linear-gradient(90deg, ${T.accent}, ${T.accentMid}, #a78bfa)` }} />
-                    <Box sx={{ p: { xs: 2.5, md: 3 } }}>
-                      {/* insight header badge */}
-                      <Box display="flex" alignItems="center" gap={1} mb={2.5}>
-                        <Box sx={{ width: 32, height: 32, borderRadius: "10px", background: `linear-gradient(135deg, ${T.accent}, #7c3aed)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.9rem" }}>
-                          ✦
-                        </Box>
-                        <Box>
-                          <Typography sx={{ fontFamily: font, fontSize: "0.82rem", fontWeight: 700, color: T.text }}>
-                            AI-Generated Analysis
-                          </Typography>
-                          <Typography sx={{ fontFamily: mono, fontSize: "0.6rem", color: T.muted }}>
-                            Powered by Claude
-                          </Typography>
-                        </Box>
-                      </Box>
-                      <Box sx={{ "& *": { fontFamily: `${font} !important`, color: `${T.sub} !important`, fontSize: "0.875rem !important", lineHeight: "1.7 !important" } }}>
-                        <Insights insights={data.insights} />
-                      </Box>
-                    </Box>
+        {/* COLUMN ANALYSIS SECTION */}
+        <Box>
+          <SectionLabel icon="📐">Column Analysis</SectionLabel>
+          <Grid container spacing={2}>
+            {Object.entries(data.summary).map(([col, stats]) => (
+              <Grid item xs={12} sm={6} key={col}>
+                <ColumnCard col={col} stats={stats} />
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      </Box>
+    </Grid>
+
+    {/* ROW 1/2: CHARTS & INSIGHTS (NOW STACKED ON THE RIGHT OR BELOW) */}
+    <Grid item xs={12} lg={4}>
+      <Box display="flex" flexDirection="column" gap={4}>
+        
+        {/* VISUALIZATIONS - Now takes full width of its container */}
+        <Box>
+          <SectionLabel icon="📊">Visualizations</SectionLabel>
+          <Box
+            sx={{
+              bgcolor: T.surface,
+              border: `1px solid ${T.border}`,
+              borderRadius: "16px",
+              p: { xs: 2, md: 3 },
+              boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
+              width: "100%", // Ensures charts stretch
+            }}
+          >
+            {/* CRITICAL: Inside your Charts component, ensure 
+               ResponsiveContainer has a parent with a fixed height 
+            */}
+            <Charts charts={data.charts} />
+          </Box>
+        </Box>
+
+        {/* AI INSIGHTS - Now appears directly below Visualizations */}
+        {data.insights && (
+          <Box>
+            <SectionLabel icon="🪄">AI Insights</SectionLabel>
+            <Box
+              sx={{
+                bgcolor: T.surface,
+                border: `1px solid ${T.border}`,
+                borderRadius: "16px",
+                overflow: "hidden",
+                boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
+              }}
+            >
+              <Box sx={{ height: 3, background: `linear-gradient(90deg, ${T.accent}, ${T.accentMid}, #a78bfa)` }} />
+              <Box sx={{ p: { xs: 2.5, md: 3 } }}>
+                <Box display="flex" alignItems="center" gap={1} mb={2.5}>
+                  <Box sx={{ width: 32, height: 32, borderRadius: "10px", background: `linear-gradient(135deg, ${T.accent}, #7c3aed)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                    ✦
+                  </Box>
+                  <Box>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.82rem", fontWeight: 700, color: T.text }}>
+                      AI-Generated Analysis
+                    </Typography>
                   </Box>
                 </Box>
-              )}
-
+                <Insights insights={data.insights} />
+              </Box>
             </Box>
-          </Grid>
+          </Box>
+        )}
+
+      </Box>
+    </Grid>
+
+  </Grid>
+</Box>
 
         </Grid>
       </Box>
