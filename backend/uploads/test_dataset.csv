@@ -1,0 +1,6 @@
+EmployeeID,Name,Department,Experience_Years,Education_Level,Age,Gender,City,Monthly_Salary
+1,Employee_1,Marketing,15,Master,53,Female,Delhi,111416
+2,Employee_2,Operations,7,Bachelor,25,Female,Bangalore,95271
+3,Employee_3,IT,12,High School,51,Female,Hyderabad,69064
+4,Employee_4,Operations,8,PhD,44,Male,Delhi,95091
+5,Employee_5,Operations,15,Master,36,Female,Delhi,132450
