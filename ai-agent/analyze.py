@@ -9,14 +9,21 @@ from visualization import generate_charts
 file_path = sys.argv[1]
 
 try:
-    # 📂 Load data
-    df = pd.read_csv(file_path)
+    # 📂 Load data (automatically detect delimiter like tab, comma, semicolon)
+    df = pd.read_csv(file_path, sep=None, engine='python')
 
     # 🧹 Clean data
     df = clean_data(df)
 
     # 📊 Summary
-    summary = df.describe(include='all').fillna("").to_dict()
+    desc = df.describe(include='all').fillna("").to_dict()
+    null_counts = df.isnull().sum().to_dict()
+    
+    summary = {}
+    for col in df.columns:
+        summary[col] = desc.get(col, {})
+        summary[col]["missing"] = int(null_counts.get(col, 0))
+        summary[col]["dtype"] = str(df[col].dtype)
 
     # 📋 Preview
     preview = df.head(20).to_dict(orient="records")
