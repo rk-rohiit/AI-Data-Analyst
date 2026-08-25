@@ -1,18 +1,20 @@
 import { Grid, Typography, Box, TextField, InputAdornment, Button } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import Charts from "../components/Charts";
 import Insights from "../components/Insights";
 import { useState } from "react";
 
 /* ─── design tokens ─────────────────────────────── */
 const getTokens = (darkMode) => ({
-  bg: darkMode ? "#0b0f19" : "#f0f4ff",
-  surface: darkMode ? "#111827" : "#ffffff",
-  surfaceHover: darkMode ? "#1f2937" : "#f8faff",
-  border: darkMode ? "#1f2937" : "#e2e8f4",
-  borderStrong: darkMode ? "#374151" : "#c7d2fe",
-  accent: "#6366f1",
-  accentSoft: darkMode ? "rgba(99, 102, 241, 0.15)" : "#eef2ff",
-  accentMid: "#818cf8",
+  bg: darkMode ? "#171717" : "#EAEAEA",
+  surface: darkMode ? "#222222" : "#ffffff",
+  surfaceHover: darkMode ? "#2e2e2e" : "rgba(8, 217, 214, 0.04)",
+  border: darkMode ? "#444444" : "#cbd5e1",
+  borderStrong: darkMode ? "#555555" : "#08D9D6",
+  accent: darkMode ? "#DA0037" : "#FF2E63",
+  accentSoft: darkMode ? "rgba(218, 0, 55, 0.15)" : "rgba(255, 46, 99, 0.08)",
+  accentMid: darkMode ? "#DA0037" : "#FF2E63",
   warm: "#f59e0b",
   warmSoft: darkMode ? "rgba(245, 158, 11, 0.15)" : "#fffbeb",
   green: "#10b981",
@@ -20,10 +22,10 @@ const getTokens = (darkMode) => ({
   sky: "#0ea5e9",
   skySoft: darkMode ? "rgba(14, 165, 233, 0.15)" : "#e0f2fe",
   rose: "#f43f5e",
-  text: darkMode ? "#f9fafb" : "#0f172a",
-  sub: darkMode ? "#d1d5db" : "#334155",
-  muted: darkMode ? "#9ca3af" : "#94a3b8",
-  faint: darkMode ? "#1f2937" : "#f8fafc",
+  text: darkMode ? "#EDEDED" : "#252A34",
+  sub: darkMode ? "#dfdfdf" : "#444444",
+  muted: darkMode ? "#999999" : "#666666",
+  faint: darkMode ? "#2a2a2a" : "#f1f1f1",
 });
 
 const font = "'Plus Jakarta Sans', sans-serif";
@@ -42,7 +44,7 @@ const formatValue = (val) => {
 };
 
 /* ─── Dashboard ──────────────────────────────────────────── */
-const Dashboard = ({ data, darkMode }) => {
+const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   const T = getTokens(darkMode);
 
   /* ─── sub-components ─────────────────────────────────────── */
@@ -192,7 +194,9 @@ const Dashboard = ({ data, darkMode }) => {
       {/* ── HERO HEADER ── */}
       <Box
         sx={{
-          background: `linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a21caf 100%)`,
+          background: darkMode
+            ? "linear-gradient(135deg, #171717 0%, #444444 50%, #DA0037 100%)"
+            : "linear-gradient(135deg, #252A34 0%, #FF2E63 65%, #08D9D6 100%)",
           px: { xs: 3, md: 6 },
           pt: { xs: 5, md: 6 },
           pb: { xs: 7, md: 8 },
@@ -211,20 +215,60 @@ const Dashboard = ({ data, darkMode }) => {
         <Box sx={{ position: "absolute", top: -60, right: -60, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
         <Box sx={{ position: "absolute", bottom: -80, left: "30%", width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
 
-        <Box sx={{ position: "relative", zIndex: 1 }}>
-          <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1, bgcolor: "rgba(255,255,255,0.15)", borderRadius: "8px", px: 1.5, py: 0.6, mb: 3, backdropFilter: "blur(8px)" }}>
-            <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#4ade80", animation: "shimmer 2s infinite" }} />
-            <Typography sx={{ fontFamily: mono, fontSize: "0.6rem", color: "#fff", fontWeight: 600, letterSpacing: "0.14em" }}>
-              DATASET LOADED
+        <Box sx={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 2 }}>
+          <Box>
+            <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1, bgcolor: "rgba(255,255,255,0.15)", borderRadius: "8px", px: 1.5, py: 0.6, mb: 3, backdropFilter: "blur(8px)" }}>
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#4ade80", animation: "shimmer 2s infinite" }} />
+              <Typography sx={{ fontFamily: mono, fontSize: "0.6rem", color: "#fff", fontWeight: 600, letterSpacing: "0.14em" }}>
+                DATASET LOADED
+              </Typography>
+            </Box>
+
+            <Typography sx={{ fontFamily: font, fontWeight: 800, fontSize: { xs: "2rem", md: "2.8rem" }, color: "#fff", letterSpacing: "-0.04em", lineHeight: 1.05, mb: 1.5 }}>
+              Dataset Dashboard
+            </Typography>
+            <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", color: "rgba(255,255,255,0.65)" }}>
+              {(data.rows ?? 0).toLocaleString()} rows &nbsp;·&nbsp; {data.columns} columns &nbsp;·&nbsp; {numericCols} numeric &nbsp;·&nbsp; {catCols} categorical
             </Typography>
           </Box>
 
-          <Typography sx={{ fontFamily: font, fontWeight: 800, fontSize: { xs: "2rem", md: "2.8rem" }, color: "#fff", letterSpacing: "-0.04em", lineHeight: 1.05, mb: 1.5 }}>
-            Dataset Dashboard
-          </Typography>
-          <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", color: "rgba(255,255,255,0.65)" }}>
-            {(data.rows ?? 0).toLocaleString()} rows &nbsp;·&nbsp; {data.columns} columns &nbsp;·&nbsp; {numericCols} numeric &nbsp;·&nbsp; {catCols} categorical
-          </Typography>
+          {/* Theme Switch Option */}
+          {onToggleDarkMode && (
+            <Box 
+              sx={{ 
+                display: "flex", 
+                alignItems: "center", 
+                gap: 1.2, 
+                bgcolor: "rgba(255,255,255,0.12)", 
+                backdropFilter: "blur(8px)", 
+                border: "1px solid rgba(255,255,255,0.2)", 
+                borderRadius: "12px", 
+                p: "8px 16px", 
+                cursor: "pointer", 
+                userSelect: "none",
+                transition: "all 0.2s", 
+                "&:hover": { 
+                  bgcolor: "rgba(255,255,255,0.2)",
+                  transform: "translateY(-1px)"
+                },
+                "&:active": {
+                  transform: "translateY(0)"
+                }
+              }} 
+              onClick={onToggleDarkMode}
+            >
+              <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.75rem", color: "#fff", letterSpacing: "0.02em" }}>
+                {darkMode ? "LIGHT MODE" : "DARK MODE"}
+              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", color: "#fff" }}>
+                {darkMode ? (
+                  <LightModeIcon sx={{ fontSize: "1.1rem", color: "#FF2E63" }} />
+                ) : (
+                  <DarkModeIcon sx={{ fontSize: "1.1rem", color: "#08D9D6" }} />
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
       </Box>
 

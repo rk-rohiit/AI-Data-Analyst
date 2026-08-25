@@ -7,7 +7,7 @@
 
 ## 🚀 Executive Summary
 
-**AI Data Analyst** is a cutting-edge, containerized data science platform that transforms complex datasets into actionable business intelligence using Artificial Intelligence. It eliminates the traditional barriers between data analysis and software engineering by providing a seamless, end-to-end workflow: from raw CSV upload to interactive visualizations, all powered by a production-grade FastAPI backend and a state-of-the-art AI analysis pipeline.
+**AI Data Analyst** is a cutting-edge, containerized data science platform that transforms complex datasets into actionable business intelligence using Artificial Intelligence. It eliminates the traditional barriers between data analysis and software engineering by providing a seamless, end-to-end workflow: from raw CSV upload to interactive visualizations, all powered by a production-grade Node.js + Express backend and a state-of-the-art Python AI analysis pipeline.
 
 ### 🔹 What It Does
 

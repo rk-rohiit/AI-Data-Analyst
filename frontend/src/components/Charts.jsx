@@ -21,11 +21,13 @@ const PALETTES = {
   sky: ["#0ea5e9", "#0284c7", "#38bdf8", "#7dd3fc", "#bae6fd", "#e0f2fe"],
   rose: ["#f43f5e", "#e11d48", "#fb7185", "#fda4af", "#fecdd3", "#ffe4e6"],
   sunset: ["#f97316", "#ea580c", "#fb923c", "#fdba74", "#fed7aa", "#ffedd5"],
+  crimson: ["#DA0037", "#ff3366", "#ff6688", "#ff99aa", "#ffcccc", "#ffeef0"],
+  neon: ["#FF2E63", "#08D9D6", "#252A34", "#EAEAEA", "#ff6688", "#5cd6d4"]
 };
 
 const Charts = ({ charts, darkMode }) => {
   const [tabValue, setTabValue] = useState(0);
-  const [paletteName, setPaletteName] = useState("indigo");
+  const [paletteName, setPaletteName] = useState(darkMode ? "crimson" : "neon");
   const [chartTypes, setChartTypes] = useState({});
   const [distFilter, setDistFilter] = useState("all");
   const [catFilter, setCatFilter] = useState("all");
@@ -39,27 +41,27 @@ const Charts = ({ charts, darkMode }) => {
     );
   }
 
-  const palette = PALETTES[paletteName];
+  const palette = PALETTES[paletteName] || PALETTES[darkMode ? "crimson" : "neon"];
 
   // Dynamic Theme Colors
   const C = {
-    cardBg: darkMode ? "#111827" : "#ffffff",
-    cardBorder: darkMode ? "1px solid #1f2937" : "1px solid #e2e8f0",
-    actionsBg: darkMode ? "#1c2536" : "#f8fafc",
-    actionsBorder: darkMode ? "1px solid #1f2937" : "1px solid #f1f5f9",
-    textTitle: darkMode ? "#f9fafb" : "#334155",
-    textSub: darkMode ? "#9ca3af" : "#64748b",
-    gridStroke: darkMode ? "#1f2937" : "#f1f5f9",
-    axisFill: darkMode ? "#9ca3af" : "#94a3b8",
-    tooltipBg: darkMode ? "#1f2937" : "#ffffff",
-    tooltipBorder: darkMode ? "1px solid #374151" : "none",
-    tooltipColor: darkMode ? "#ffffff" : "#000000",
-    pillBg: darkMode ? "#1f2936" : "#f8fafc",
-    pillBorder: darkMode ? "#374151" : "#e2e8f4",
-    tableHeaderBorder: darkMode ? "2px solid #374151" : "2px solid #cbd5e1",
-    tableRowBorder: darkMode ? "2px solid #374151" : "2px solid #cbd5e1",
-    tableText: darkMode ? "#d1d5db" : "#475569",
-    inputLabelColor: darkMode ? "#9ca3af" : "#64748b"
+    cardBg: darkMode ? "#222222" : "#ffffff",
+    cardBorder: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)",
+    actionsBg: darkMode ? "#171717" : "#EAEAEA",
+    actionsBorder: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)",
+    textTitle: darkMode ? "#EDEDED" : "#252A34",
+    textSub: darkMode ? "#999999" : "#555555",
+    gridStroke: darkMode ? "#444444" : "#e0e0e0",
+    axisFill: darkMode ? "#999999" : "#666666",
+    tooltipBg: darkMode ? "#222222" : "#ffffff",
+    tooltipBorder: darkMode ? "1px solid #444444" : "1px solid #08D9D6",
+    tooltipColor: darkMode ? "#EDEDED" : "#252A34",
+    pillBg: darkMode ? "#171717" : "#ffffff",
+    pillBorder: darkMode ? "#444444" : "1px solid rgba(8, 217, 214, 0.3)",
+    tableHeaderBorder: darkMode ? "2px solid #444444" : "2px solid #08D9D6",
+    tableRowBorder: darkMode ? "2px solid #444444" : "1px solid #cbd5e1",
+    tableText: darkMode ? "#dfdfdf" : "#252A34",
+    inputLabelColor: darkMode ? "#999999" : "#555555"
   };
 
   // Helper: Download SVG

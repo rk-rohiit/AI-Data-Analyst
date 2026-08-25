@@ -72,13 +72,13 @@ const Insights = ({ insights, darkMode }) => {
               gap: 2,
               p: 2,
               borderRadius: "12px",
-              bgcolor: darkMode ? "#1f2937" : "#f8fafc",
-              border: darkMode ? "1px solid #374151" : "1px solid #e2e8f0",
+              bgcolor: darkMode ? "#222222" : "#ffffff",
+              border: darkMode ? "1px solid #444444" : "1px solid #cbd5e1",
               transition: "transform 0.18s ease, box-shadow 0.18s ease, background-color 0.2s, border-color 0.2s",
               "&:hover": {
                 transform: "translateX(4px)",
-                boxShadow: darkMode ? "0 4px 12px rgba(0,0,0,0.25)" : "0 2px 8px rgba(15,23,42,0.05)",
-                borderColor: darkMode ? "#4b5563" : "#cbd5e1"
+                boxShadow: darkMode ? "0 4px 12px rgba(0,0,0,0.4)" : "0 2px 8px rgba(37,42,52,0.04)",
+                borderColor: darkMode ? "#DA0037" : "#FF2E63"
               }
             }}
           >
@@ -107,11 +107,11 @@ const Insights = ({ insights, darkMode }) => {
               variant="body2"
               sx={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                color: darkMode ? "#d1d5db" : "#334155",
+                color: darkMode ? "#dfdfdf" : "#444444",
                 fontWeight: 500,
                 lineHeight: 1.5,
                 "& strong": {
-                  color: darkMode ? "#ffffff" : "#0f172a",
+                  color: darkMode ? "#EDEDED" : "#252A34",
                   fontWeight: 700
                 }
               }}

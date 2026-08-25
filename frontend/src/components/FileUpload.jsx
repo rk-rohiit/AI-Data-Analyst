@@ -72,8 +72,8 @@ const FileUpload = ({ setData, darkMode }) => {
         overflow: "hidden",
         borderRadius: "24px",
         background: darkMode 
-          ? "linear-gradient(135deg, #090d16 0%, #0b0f19 100%)" 
-          : "linear-gradient(135deg, #f3f6ff 0%, #e8edff 100%)",
+          ? "linear-gradient(135deg, #171717 0%, #0d0d0d 100%)" 
+          : "linear-gradient(135deg, #EAEAEA 0%, #d8d8d8 100%)",
         px: 3,
         py: 6,
         transition: "background-color 0.2s"
@@ -103,8 +103,8 @@ const FileUpload = ({ setData, darkMode }) => {
           100% { background-position: 40px 40px; }
         }
         @keyframes pulseGlow {
-          0%, 100% { box-shadow: 0 0 15px rgba(79, 70, 229, 0.15); }
-          50% { box-shadow: 0 0 35px rgba(79, 70, 229, 0.4); }
+          0%, 100% { box-shadow: ${darkMode ? "0 0 15px rgba(218, 0, 55, 0.15)" : "0 0 15px rgba(255, 46, 99, 0.15)"}; }
+          50% { box-shadow: ${darkMode ? "0 0 35px rgba(218, 0, 55, 0.45)" : "0 0 35px rgba(255, 46, 99, 0.3)"}; }
         }
       `}</style>
 
@@ -115,10 +115,10 @@ const FileUpload = ({ setData, darkMode }) => {
           position: "absolute",
           inset: 0,
           backgroundImage: darkMode
-            ? `linear-gradient(rgba(129, 140, 248, 0.02) 1px, transparent 1px), 
-              linear-gradient(90deg, rgba(129, 140, 248, 0.02) 1px, transparent 1px)`
-            : `linear-gradient(rgba(79, 70, 229, 0.035) 1px, transparent 1px), 
-              linear-gradient(90deg, rgba(79, 70, 229, 0.035) 1px, transparent 1px)`,
+            ? `linear-gradient(rgba(218, 0, 55, 0.08) 1px, transparent 1px), 
+              linear-gradient(90deg, rgba(218, 0, 55, 0.08) 1px, transparent 1px)`
+            : `linear-gradient(rgba(8, 217, 214, 0.18) 1px, transparent 1px), 
+              linear-gradient(90deg, rgba(8, 217, 214, 0.18) 1px, transparent 1px)`,
           backgroundSize: "30px 30px",
           animation: "gridMove 12s linear infinite",
           pointerEvents: "none",
@@ -136,8 +136,8 @@ const FileUpload = ({ setData, darkMode }) => {
           height: 380,
           borderRadius: "50%",
           background: darkMode
-            ? "radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0) 70%)"
-            : "radial-gradient(circle, rgba(99,102,241,0.2) 0%, rgba(99,102,241,0) 70%)",
+            ? "radial-gradient(circle, rgba(218, 0, 55, 0.18) 0%, rgba(218, 0, 55, 0) 70%)"
+            : "radial-gradient(circle, rgba(8, 217, 214, 0.28) 0%, rgba(8, 217, 214, 0) 70%)",
           animation: "float2 14s ease-in-out infinite",
           pointerEvents: "none",
           zIndex: 1,
@@ -152,8 +152,8 @@ const FileUpload = ({ setData, darkMode }) => {
           height: 480,
           borderRadius: "50%",
           background: darkMode
-            ? "radial-gradient(circle, rgba(168,85,247,0.08) 0%, rgba(168,85,247,0) 70%)"
-            : "radial-gradient(circle, rgba(168,85,247,0.15) 0%, rgba(168,85,247,0) 70%)",
+            ? "radial-gradient(circle, rgba(218, 0, 55, 0.14) 0%, rgba(218, 0, 55, 0) 70%)"
+            : "radial-gradient(circle, rgba(255, 46, 99, 0.22) 0%, rgba(255, 46, 99, 0) 70%)",
           animation: "float3 18s ease-in-out infinite",
           pointerEvents: "none",
           zIndex: 1,
@@ -168,8 +168,8 @@ const FileUpload = ({ setData, darkMode }) => {
           height: 280,
           borderRadius: "50%",
           background: darkMode
-            ? "radial-gradient(circle, rgba(236,72,153,0.06) 0%, rgba(236,72,153,0) 70%)"
-            : "radial-gradient(circle, rgba(236,72,153,0.1) 0%, rgba(236,72,153,0) 70%)",
+            ? "radial-gradient(circle, rgba(218, 0, 55, 0.12) 0%, rgba(218, 0, 55, 0) 70%)"
+            : "radial-gradient(circle, rgba(8, 217, 214, 0.24) 0%, rgba(8, 217, 214, 0) 70%)",
           animation: "float1 16s ease-in-out infinite",
           pointerEvents: "none",
           zIndex: 1,
@@ -177,10 +177,10 @@ const FileUpload = ({ setData, darkMode }) => {
       />
 
       {/* Floating AI/ML Math Decors */}
-      <Box sx={{ position: "absolute", top: "15%", left: "15%", opacity: darkMode ? 0.08 : 0.12, zIndex: 1, fontFamily: "monospace", fontSize: "1.2rem", fontWeight: 700, color: "#818cf8", userSelect: "none" }}>y = wx + b</Box>
-      <Box sx={{ position: "absolute", bottom: "25%", left: "20%", opacity: darkMode ? 0.05 : 0.08, zIndex: 1, fontFamily: "monospace", fontSize: "1.5rem", fontWeight: 800, color: "#a78bfa", userSelect: "none" }}>f(x) = σ(z)</Box>
-      <Box sx={{ position: "absolute", top: "25%", right: "25%", opacity: darkMode ? 0.06 : 0.1, zIndex: 1, fontFamily: "monospace", fontSize: "1.1rem", fontWeight: 700, color: "#f472b6", userSelect: "none" }}>[0, 1, 0, 1]</Box>
-      <Box sx={{ position: "absolute", bottom: "15%", right: "20%", opacity: darkMode ? 0.08 : 0.12, zIndex: 1, fontFamily: "monospace", fontSize: "1.3rem", fontWeight: 700, color: "#818cf8", userSelect: "none" }}>R² = 0.985</Box>
+      <Box sx={{ position: "absolute", top: "15%", left: "15%", opacity: darkMode ? 0.16 : 0.12, zIndex: 1, fontFamily: "monospace", fontSize: "1.2rem", fontWeight: 700, color: darkMode ? "#DA0037" : "#FF2E63", userSelect: "none" }}>y = wx + b</Box>
+      <Box sx={{ position: "absolute", bottom: "25%", left: "20%", opacity: darkMode ? 0.12 : 0.08, zIndex: 1, fontFamily: "monospace", fontSize: "1.5rem", fontWeight: 800, color: darkMode ? "#EDEDED" : "#252A34", userSelect: "none" }}>f(x) = σ(z)</Box>
+      <Box sx={{ position: "absolute", top: "25%", right: "25%", opacity: darkMode ? 0.14 : 0.1, zIndex: 1, fontFamily: "monospace", fontSize: "1.1rem", fontWeight: 700, color: darkMode ? "#DA0037" : "#08D9D6", userSelect: "none" }}>[0, 1, 0, 1]</Box>
+      <Box sx={{ position: "absolute", bottom: "15%", right: "20%", opacity: darkMode ? 0.15 : 0.12, zIndex: 1, fontFamily: "monospace", fontSize: "1.3rem", fontWeight: 700, color: darkMode ? "#EDEDED" : "#FF2E63", userSelect: "none" }}>R² = 0.985</Box>
 
       {/* ── GLASSMORPHIC UPLOAD CARD ── */}
       <Paper
@@ -191,12 +191,12 @@ const FileUpload = ({ setData, darkMode }) => {
           width: "100%",
           maxWidth: 520,
           textAlign: "center",
-          background: darkMode ? "rgba(17, 24, 39, 0.72)" : "rgba(255, 255, 255, 0.72)",
+          background: darkMode ? "rgba(23, 23, 23, 0.85)" : "rgba(255, 255, 255, 0.85)",
           backdropFilter: "blur(20px)",
           webkitBackdropFilter: "blur(20px)",
-          border: darkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid rgba(255, 255, 255, 0.45)",
+          border: darkMode ? "1px solid #444444" : "1px solid #08D9D6",
           borderRadius: "24px",
-          boxShadow: darkMode ? "0 25px 60px rgba(0, 0, 0, 0.35)" : "0 20px 50px rgba(15, 23, 42, 0.08)",
+          boxShadow: darkMode ? "0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(218, 0, 55, 0.08)" : "0 25px 60px rgba(37, 42, 52, 0.08), 0 0 30px rgba(8, 217, 214, 0.06)",
           zIndex: 10,
           overflow: "hidden",
           animation: loading ? "pulseGlow 3s ease-in-out infinite" : "none",
@@ -211,9 +211,11 @@ const FileUpload = ({ setData, darkMode }) => {
               left: 0,
               width: "100%",
               height: "4px",
-              background: "linear-gradient(to right, transparent, #4f46e5, #7c3aed, #ec4899, #4f46e5, transparent)",
+              background: darkMode 
+                ? "linear-gradient(to right, transparent, #DA0037, #EDEDED, #DA0037, transparent)"
+                : "linear-gradient(to right, transparent, #FF2E63, #08D9D6, #FF2E63, transparent)",
               animation: "scan 3s linear infinite",
-              boxShadow: "0 0 10px #7c3aed",
+              boxShadow: darkMode ? "0 0 12px #DA0037" : "0 0 12px #FF2E63",
               zIndex: 15,
             }}
           />
@@ -227,7 +229,7 @@ const FileUpload = ({ setData, darkMode }) => {
               thickness={4}
               sx={{
                 mb: 3,
-                color: "#818cf8",
+                color: darkMode ? "#DA0037" : "#FF2E63",
                 "& .MuiCircularProgress-circle": { strokeLinecap: "round" }
               }}
             />
@@ -236,7 +238,7 @@ const FileUpload = ({ setData, darkMode }) => {
               variant="subtitle1"
               sx={{
                 fontWeight: 700,
-                color: darkMode ? "#f9fafb" : "#0f172a",
+                color: darkMode ? "#EDEDED" : "#252A34",
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 letterSpacing: "-0.01em",
                 mb: 1
@@ -249,7 +251,7 @@ const FileUpload = ({ setData, darkMode }) => {
               variant="body2"
               sx={{
                 fontFamily: "'IBM Plex Mono', monospace",
-                color: "#818cf8",
+                color: darkMode ? "#DA0037" : "#FF2E63",
                 fontWeight: 600,
                 fontSize: "0.78rem"
               }}
@@ -268,12 +270,12 @@ const FileUpload = ({ setData, darkMode }) => {
                 width: 60,
                 height: 60,
                 borderRadius: "16px",
-                background: darkMode ? "linear-gradient(135deg, #1f2937 0%, #111827 100%)" : "linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%)",
+                background: darkMode ? "linear-gradient(135deg, #2a2a2a 0%, #171717 100%)" : "linear-gradient(135deg, #ffffff 0%, #EAEAEA 100%)",
                 mb: 3,
-                border: darkMode ? "1px solid #374151" : "1px solid #c7d2fe"
+                border: darkMode ? "1px solid #444444" : "1px solid #08D9D6"
               }}
             >
-              <MemoryIcon sx={{ color: "#818cf8", fontSize: "1.8rem" }} />
+              <MemoryIcon sx={{ color: darkMode ? "#DA0037" : "#FF2E63", fontSize: "1.8rem" }} />
             </Box>
 
             <Typography
@@ -281,7 +283,7 @@ const FileUpload = ({ setData, darkMode }) => {
               sx={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
                 fontWeight: 800,
-                color: darkMode ? "#f9fafb" : "#0f172a",
+                color: darkMode ? "#EDEDED" : "#252A34",
                 letterSpacing: "-0.02em",
                 mb: 1
               }}
@@ -293,7 +295,7 @@ const FileUpload = ({ setData, darkMode }) => {
               variant="body2"
               sx={{
                 fontFamily: "'Plus Jakarta Sans', sans-serif",
-                color: darkMode ? "#9ca3af" : "#64748b",
+                color: darkMode ? "rgba(237, 237, 237, 0.7)" : "rgba(37, 42, 52, 0.75)",
                 fontWeight: 500,
                 lineHeight: 1.6,
                 mb: 4
@@ -318,23 +320,23 @@ const FileUpload = ({ setData, darkMode }) => {
                   cursor: "pointer",
                   p: 4,
                   borderRadius: "16px",
-                  bgcolor: darkMode ? "rgba(31, 41, 55, 0.4)" : "rgba(241, 245, 249, 0.6)",
-                  border: darkMode ? "2px dashed #4b5563" : "2px dashed #cbd5e1",
+                  bgcolor: darkMode ? "rgba(23, 23, 23, 0.5)" : "rgba(255, 255, 255, 0.5)",
+                  border: darkMode ? "2px dashed #444444" : "2px dashed #08D9D6",
                   transition: "background 0.2s, border-color 0.2s, transform 0.15s",
                   "&:hover": {
-                    bgcolor: darkMode ? "rgba(55, 65, 81, 0.5)" : "rgba(226, 232, 240, 0.7)",
-                    borderColor: "#818cf8",
+                    bgcolor: darkMode ? "rgba(68, 68, 68, 0.4)" : "rgba(8, 217, 214, 0.06)",
+                    borderColor: darkMode ? "#DA0037" : "#FF2E63",
                     transform: "scale(1.01)"
                   },
                 }}
               >
-                <CloudUploadIcon sx={{ color: "#818cf8", fontSize: 44, mb: 1 }} />
+                <CloudUploadIcon sx={{ color: darkMode ? "#DA0037" : "#FF2E63", fontSize: 44, mb: 1 }} />
                 <Typography
                   sx={{
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontWeight: 700,
                     fontSize: "0.85rem",
-                    color: darkMode ? "#e5e7eb" : "#334155"
+                    color: darkMode ? "#EDEDED" : "#252A34"
                   }}
                 >
                   Click to choose file
@@ -343,7 +345,7 @@ const FileUpload = ({ setData, darkMode }) => {
                   sx={{
                     fontFamily: "'Plus Jakarta Sans', sans-serif",
                     fontSize: "0.72rem",
-                    color: darkMode ? "#9ca3af" : "#94a3b8",
+                    color: darkMode ? "rgba(237, 237, 237, 0.6)" : "rgba(37, 42, 52, 0.6)",
                     mt: 0.5
                   }}
                 >
@@ -363,21 +365,21 @@ const FileUpload = ({ setData, darkMode }) => {
                 sx={{
                   py: 1.5,
                   px: 2,
-                  bgcolor: darkMode ? "rgba(99, 102, 241, 0.1)" : "#f0f4ff",
+                  bgcolor: darkMode ? "rgba(218, 0, 55, 0.08)" : "rgba(255, 46, 99, 0.06)",
                   borderRadius: "12px",
-                  border: darkMode ? "1px solid rgba(99, 102, 241, 0.25)" : "1px solid #c7d2fe",
+                  border: darkMode ? "1px solid rgba(218, 0, 55, 0.25)" : "1px solid rgba(255, 46, 99, 0.25)",
                   maxWidth: "100%",
                   overflow: "hidden"
                 }}
               >
-                <InsertDriveFileIcon sx={{ color: "#818cf8", fontSize: "1.1rem" }} />
+                <InsertDriveFileIcon sx={{ color: darkMode ? "#DA0037" : "#FF2E63", fontSize: "1.1rem" }} />
                 <Typography
                   variant="body2"
                   sx={{
                     fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: "0.78rem",
                     fontWeight: 600,
-                    color: darkMode ? "#e5e7eb" : "#334155",
+                    color: darkMode ? "#EDEDED" : "#252A34",
                     textOverflow: "ellipsis",
                     overflow: "hidden",
                     whiteSpace: "nowrap"
@@ -403,15 +405,15 @@ const FileUpload = ({ setData, darkMode }) => {
                 fontWeight: 700,
                 textTransform: "none",
                 fontSize: "0.88rem",
-                boxShadow: darkMode ? "0 8px 24px rgba(0, 0, 0, 0.3)" : "0 8px 24px rgba(79, 70, 229, 0.25)",
-                background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                boxShadow: darkMode ? "0 8px 24px rgba(218, 0, 55, 0.3)" : "0 8px 24px rgba(255, 46, 99, 0.2)",
+                background: darkMode ? "linear-gradient(135deg, #DA0037 0%, #aa0029 100%)" : "linear-gradient(135deg, #FF2E63 0%, #d61145 100%)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #4338ca 0%, #6d28d9 100%)",
-                  boxShadow: darkMode ? "0 10px 28px rgba(0, 0, 0, 0.4)" : "0 10px 28px rgba(79, 70, 229, 0.35)"
+                  background: darkMode ? "linear-gradient(135deg, #b8002d 0%, #850020 100%)" : "linear-gradient(135deg, #d61145 0%, #a3002d 100%)",
+                  boxShadow: darkMode ? "0 10px 28px rgba(218, 0, 55, 0.4)" : "0 10px 28px rgba(255, 46, 99, 0.3)"
                 },
                 "&.Mui-disabled": {
-                  bgcolor: darkMode ? "#1f2937" : "#e2e8f0",
-                  color: darkMode ? "#4b5563" : "#94a3b8",
+                  bgcolor: darkMode ? "#2a2a2a" : "#e0e0e0",
+                  color: darkMode ? "#555555" : "#a0a0a0",
                   boxShadow: "none"
                 }
               }}

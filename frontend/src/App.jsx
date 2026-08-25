@@ -27,7 +27,7 @@ function App() {
       )}
 
       {activePage === "dashboard" && data && (
-        <Dashboard data={data} darkMode={darkMode} />
+        <Dashboard data={data} darkMode={darkMode} onToggleDarkMode={() => setDarkMode(!darkMode)} />
       )}
     </Layout>
   );

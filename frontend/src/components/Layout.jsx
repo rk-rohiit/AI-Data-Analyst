@@ -36,7 +36,7 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
   ];
 
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: darkMode ? "#0b0f19" : "#f8fafc", transition: "background-color 0.2s" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: darkMode ? "#171717" : "#EAEAEA", transition: "background-color 0.2s" }}>
       
       {/* ── MOBILE OVERLAY ── */}
       {open && (
@@ -46,7 +46,7 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
             display: { xs: "block", lg: "none" },
             position: "fixed",
             inset: 0,
-            bgcolor: darkMode ? "rgba(3, 7, 18, 0.6)" : "rgba(15, 23, 42, 0.4)",
+            bgcolor: darkMode ? "rgba(23, 23, 23, 0.6)" : "rgba(37, 42, 52, 0.4)",
             backdropFilter: "blur(4px)",
             zIndex: 1100,
           }}
@@ -62,16 +62,16 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
           height: "100vh",
           width: drawerWidth,
           background: darkMode 
-            ? "linear-gradient(180deg, #030712 0%, #0b0f19 100%)" 
-            : "linear-gradient(180deg, #090d16 0%, #0f172a 100%)",
-          borderRight: darkMode ? "1px solid #1f2937" : "1px solid rgba(255, 255, 255, 0.05)",
+            ? "linear-gradient(180deg, #171717 0%, #0d0d0d 100%)" 
+            : "linear-gradient(180deg, #ffffff 0%, #EAEAEA 100%)",
+          borderRight: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)",
           transform: {
             xs: open ? "translateX(0)" : `translateX(-${drawerWidth}px)`,
             lg: "translateX(0)"
           },
-          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, border-right-color 0.2s, color 0.2s",
           zIndex: 1200,
-          color: "#fff",
+          color: darkMode ? "#EDEDED" : "#252A34",
           display: "flex",
           flexDirection: "column"
         }}
@@ -83,18 +83,19 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
           gap={1.5}
           p={3}
           sx={{
-            borderBottom: darkMode ? "1px solid #1f2937" : "1px solid rgba(255, 255, 255, 0.06)",
-            bgcolor: "rgba(0, 0, 0, 0.15)"
+            borderBottom: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)",
+            bgcolor: darkMode ? "rgba(0, 0, 0, 0.25)" : "rgba(8, 217, 214, 0.05)",
+            transition: "border-bottom-color 0.2s, background-color 0.2s"
           }}
         >
-          <AutoAwesomeIcon sx={{ color: "#818cf8", fontSize: "1.4rem" }} />
+          <AutoAwesomeIcon sx={{ color: darkMode ? "#DA0037" : "#FF2E63", fontSize: "1.4rem" }} />
           <Typography
             sx={{
               fontWeight: 800,
               fontSize: "1rem",
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               letterSpacing: "-0.02em",
-              color: "#fff"
+              color: darkMode ? "#EDEDED" : "#252A34"
             }}
           >
             AI Data Analyst
@@ -120,29 +121,37 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
                   mb: 1,
                   py: 1.2,
                   px: 2,
-                  color: isSelected ? "#fff" : "rgba(255,255,255,0.6)",
-                  bgcolor: isSelected ? "rgba(79, 70, 229, 0.15)" : "transparent",
-                  borderLeft: isSelected ? "3px solid #818cf8" : "3px solid transparent",
-                  transition: "0.2s",
+                  color: isSelected 
+                    ? (darkMode ? "#DA0037" : "#FF2E63") 
+                    : (darkMode ? "rgba(255,255,255,0.6)" : "rgba(37, 42, 52, 0.7)"),
+                  bgcolor: isSelected 
+                    ? (darkMode ? "rgba(218, 0, 55, 0.12)" : "rgba(255, 46, 99, 0.08)") 
+                    : "transparent",
+                  borderLeft: isSelected 
+                    ? (darkMode ? "3px solid #DA0037" : "3px solid #FF2E63") 
+                    : "3px solid transparent",
+                  transition: "all 0.2s",
                   "&:hover": {
-                    bgcolor: "rgba(255, 255, 255, 0.04)",
-                    color: "#fff",
-                    "& .MuiListItemIcon-root": { color: "#818cf8" }
+                    bgcolor: darkMode ? "rgba(218, 0, 55, 0.06)" : "rgba(8, 217, 214, 0.08)",
+                    color: darkMode ? "#DA0037" : "#FF2E63",
+                    "& .MuiListItemIcon-root": { color: darkMode ? "#DA0037" : "#FF2E63" }
                   },
                   "&.Mui-selected": {
-                    bgcolor: "rgba(79, 70, 229, 0.2)",
-                    color: "#fff"
+                    bgcolor: darkMode ? "rgba(218, 0, 55, 0.18)" : "rgba(255, 46, 99, 0.12)",
+                    color: darkMode ? "#DA0037" : "#FF2E63"
                   },
                   "&.Mui-disabled": {
                     opacity: 0.38,
-                    color: "rgba(255,255,255,0.4)"
+                    color: darkMode ? "rgba(237, 237, 237, 0.4)" : "rgba(37, 42, 52, 0.4)"
                   }
                 }}
               >
                 <ListItemIcon
                   sx={{
                     minWidth: 40,
-                    color: isSelected ? "#818cf8" : "rgba(255,255,255,0.4)",
+                    color: isSelected 
+                      ? (darkMode ? "#DA0037" : "#FF2E63") 
+                      : (darkMode ? "rgba(237, 237, 237, 0.4)" : "rgba(37, 42, 52, 0.5)"),
                     transition: "color 0.2s"
                   }}
                 >
@@ -162,7 +171,7 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
                 />
 
                 {isLocked && (
-                  <LockIcon sx={{ fontSize: "0.95rem", color: "rgba(255,255,255,0.3)" }} />
+                  <LockIcon sx={{ fontSize: "0.95rem", color: darkMode ? "rgba(237, 237, 237, 0.3)" : "rgba(37, 42, 52, 0.3)" }} />
                 )}
               </ListItemButton>
             );
@@ -170,8 +179,8 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
         </List>
 
         {/* Sidebar Footer Info */}
-        <Box p={3} sx={{ borderTop: darkMode ? "1px solid #1f2937" : "1px solid rgba(255,255,255,0.06)", bgcolor: "rgba(0, 0, 0, 0.08)" }}>
-          <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.4)", fontFamily: "monospace", fontSize: "0.65rem", display: "block" }}>
+        <Box p={3} sx={{ borderTop: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)", bgcolor: darkMode ? "rgba(0, 0, 0, 0.12)" : "rgba(8, 217, 214, 0.02)", transition: "border-top-color 0.2s, background-color 0.2s" }}>
+          <Typography variant="caption" sx={{ color: darkMode ? "rgba(237, 237, 237, 0.4)" : "rgba(37, 42, 52, 0.5)", fontFamily: "monospace", fontSize: "0.65rem", display: "block", transition: "color 0.2s" }}>
             AGENT ENVIRONMENT v2.1
           </Typography>
         </Box>
@@ -192,14 +201,14 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
         <Box
           sx={{
             height: 64,
-            bgcolor: darkMode ? "rgba(17, 24, 39, 0.85)" : "rgba(255, 255, 255, 0.85)",
+            bgcolor: darkMode ? "rgba(23, 23, 23, 0.85)" : "rgba(234, 234, 234, 0.85)",
             backdropFilter: "blur(12px)",
             webkitBackdropFilter: "blur(12px)",
-            borderBottom: darkMode ? "1px solid #1f2937" : "1px solid #e2e8f0",
+            borderBottom: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.3)",
             display: "flex",
             alignItems: "center",
             px: 3,
-            color: darkMode ? "#f9fafb" : "#0f172a",
+            color: darkMode ? "#EDEDED" : "#252A34",
             position: "sticky",
             top: 0,
             zIndex: 1000,
@@ -211,9 +220,9 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
             onClick={() => setOpen(!open)}
             sx={{
               display: { xs: "flex", lg: "none" },
-              color: darkMode ? "#f9fafb" : "#0f172a",
+              color: darkMode ? "#EDEDED" : "#252A34",
               mr: 1.5,
-              border: darkMode ? "1px solid #374151" : "1px solid #cbd5e1",
+              border: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.5)",
               borderRadius: "10px",
               p: 0.8
             }}
@@ -226,7 +235,7 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
               fontFamily: "'Plus Jakarta Sans', sans-serif",
               fontWeight: 800,
               fontSize: "1.05rem",
-              color: darkMode ? "#f9fafb" : "#0f172a",
+              color: darkMode ? "#EDEDED" : "#252A34",
               letterSpacing: "-0.02em"
             }}
           >
@@ -239,14 +248,14 @@ const Layout = ({ children, activePage, onPageChange, hasData, darkMode, onToggl
           <IconButton
             onClick={onToggleDarkMode}
             sx={{
-              color: darkMode ? "#fbbf24" : "#64748b",
-              border: darkMode ? "1px solid #374151" : "1px solid #cbd5e1",
+              color: darkMode ? "#DA0037" : "#FF2E63",
+              border: darkMode ? "1px solid #444444" : "1px solid rgba(8, 217, 214, 0.5)",
               borderRadius: "10px",
               p: 0.8,
-              bgcolor: darkMode ? "rgba(251, 191, 36, 0.04)" : "transparent",
+              bgcolor: darkMode ? "rgba(218, 0, 55, 0.04)" : "transparent",
               transition: "color 0.2s, border-color 0.2s",
               "&:hover": {
-                bgcolor: darkMode ? "rgba(251, 191, 36, 0.12)" : "#f1f5f9"
+                bgcolor: darkMode ? "rgba(218, 0, 55, 0.12)" : "rgba(255, 46, 99, 0.08)"
               }
             }}
           >
