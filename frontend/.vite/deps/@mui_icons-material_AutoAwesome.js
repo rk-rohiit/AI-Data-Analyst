@@ -1,0 +1,9 @@
+"use client";
+import { dt as require_jsx_runtime } from "./styled-BFWHzhHk.js";
+import "./clsx-BOcMWqzN.js";
+import { t as createSvgIcon } from "./createSvgIcon-B0nragEe.js";
+var AutoAwesome_default = createSvgIcon(/* @__PURE__ */ (0, require_jsx_runtime().jsx)("path", { d: "m19 9 1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25z" }), "AutoAwesome");
+//#endregion
+export { AutoAwesome_default as default };
+
+//# sourceMappingURL=@mui_icons-material_AutoAwesome.js.map

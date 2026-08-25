@@ -1,12 +1,10 @@
 import { runPythonAnalysis } from "../services/pythonService.js";
+import { sendSuccess, sendError } from "../utils/apiResponse.js";
 
-export const uploadFile = async (req, res) => {
+export const uploadFile = async (req, res, next) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No file uploaded",
-      });
+      return sendError(res, "No file uploaded", null, 400);
     }
 
     const filePath = req.file.path;
@@ -16,27 +14,17 @@ export const uploadFile = async (req, res) => {
 
     // handle python error
     if (analysis.error) {
-      return res.status(500).json({
-        success: false,
-        message: "Python analysis failed",
-        error: analysis.error,
-      });
+      const error = new Error(analysis.error);
+      error.statusCode = 500;
+      throw error;
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "File uploaded & analyzed successfully",
+    return sendSuccess(res, "File uploaded & analyzed successfully", {
       filePath,
       analysis,
     });
 
   } catch (error) {
-    console.error("Upload Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Server Error",
-      error: error.message,
-    });
+    next(error);
   }
 };

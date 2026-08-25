@@ -2,9 +2,14 @@ import sys
 import pandas as pd
 import json
 
-from data_cleaning import clean_data
-from insights import generate_insights
-from visualization import generate_charts
+from preprocessor import clean_data
+from eda.insights import generate_insights
+from eda.visualization import generate_charts
+
+# Ensure a file path argument was passed
+if len(sys.argv) < 2:
+    print(json.dumps({"error": "No file path provided"}))
+    sys.exit(1)
 
 file_path = sys.argv[1]
 
@@ -41,8 +46,8 @@ try:
         "column_names": df.columns.tolist(),
         "summary": summary,
         "preview": preview,
-        "charts": charts,        # 👈 NEW
-        "insights": insights     # 👈 NEW
+        "charts": charts,
+        "insights": insights
     }
 
     print(json.dumps(result))

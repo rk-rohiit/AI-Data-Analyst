@@ -3,8 +3,8 @@ import path from "path";
 
 export const runPythonAnalysis = (filePath) => {
   return new Promise((resolve, reject) => {
-    const scriptPath = path.resolve("../ai-agent/analyze.py");
-    const pythonPath = path.resolve("../ai-agent/venv/Scripts/python.exe");
+    const scriptPath = path.resolve("../ai/ai_processor.py");
+    const pythonPath = path.resolve("../ai/venv/Scripts/python.exe");
 
     const process = spawn(pythonPath, [scriptPath, filePath]);
 

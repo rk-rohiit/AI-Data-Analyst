@@ -52,7 +52,8 @@ const FileUpload = ({ setData, darkMode }) => {
     try {
       setLoading(true);
       const res = await uploadFile(formData);
-      setData(res.data.analysis);
+      const analysisData = res.data.data ? res.data.data.analysis : res.data.analysis;
+      setData(analysisData);
     } catch (err) {
       console.error(err);
       alert("Upload failed");

@@ -131,12 +131,12 @@ data-analytics-platform/
 
 ### Tasks
 
-- [ ] Separate business logic from Express routes.
-- [ ] Separate Python functionality into modules.
-- [ ] Create reusable utility functions.
-- [ ] Standardize API response formats.
-- [ ] Add centralized error handling.
-- [ ] Add environment configuration.
+- [x] Separate business logic from Express routes.
+- [x] Separate Python functionality into modules.
+- [x] Create reusable utility functions.
+- [x] Standardize API response formats.
+- [x] Add centralized error handling.
+- [x] Add environment configuration.
 
 ---
 
