@@ -52,25 +52,25 @@ Stabilize the existing application before adding new features.
 
 ### Tasks
 
-- [ ] Verify React frontend starts correctly.
-- [ ] Verify Express backend starts correctly.
-- [ ] Verify Python AI service works correctly.
-- [ ] Verify MongoDB connection.
-- [ ] Verify CSV upload.
-- [ ] Verify Python analysis execution.
-- [ ] Verify JSON response from Python to Express.
-- [ ] Verify Express response to React.
-- [ ] Verify existing charts.
-- [ ] Verify dark/light mode.
-- [ ] Verify responsive layout.
-- [ ] Verify CSV/SVG exports.
-- [ ] Test with small, medium, and large datasets.
+- [x] Verify React frontend starts correctly.
+- [x] Verify Express backend starts correctly.
+- [x] Verify Python AI service works correctly.
+- [/] Verify MongoDB connection (Audit: MongoDB connection is not yet implemented in the codebase; the baseline currently runs via memory/spawn pipeline).
+- [x] Verify CSV upload.
+- [x] Verify Python analysis execution.
+- [x] Verify JSON response from Python to Express.
+- [x] Verify Express response to React.
+- [x] Verify existing charts.
+- [x] Verify dark/light mode.
+- [x] Verify responsive layout.
+- [x] Verify CSV/SVG exports.
+- [x] Test with small, medium, and large datasets.
 
 ### Important Documentation Fix
 
 The README currently mentions a **FastAPI backend**, while the architecture describes **Node.js + Express + Python AI service**.
 
-Update the documentation so the architecture matches the actual implementation.
+- [x] Update the documentation so the architecture matches the actual implementation.
 
 ---
 
