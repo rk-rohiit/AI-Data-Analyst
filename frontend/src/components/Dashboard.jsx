@@ -14,7 +14,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import Charts from "../components/Charts";
 import Insights from "../components/Insights";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 /* ─── design tokens ─────────────────────────────── */
 const getTokens = (darkMode) => ({
@@ -59,6 +59,27 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   const T = getTokens(darkMode);
   const [tabIndex, setTabIndex] = useState(0);
   const [selectedTarget, setSelectedTarget] = useState("");
+  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [scaling, setScaling] = useState("standard");
+  const [testSize, setTestSize] = useState(0.2);
+  const [preprocessingResult, setPreprocessingResult] = useState(null);
+  const [isPreprocessing, setIsPreprocessing] = useState(false);
+
+  useEffect(() => {
+    if (data && data.column_names) {
+      const mlTargetInfo = data.ml_target || { recommended_target: "" };
+      const recommended = mlTargetInfo.recommended_target;
+      const target = selectedTarget || recommended || "";
+      
+      const features = data.column_names.filter(col => {
+        if (col === target) return false;
+        const colLower = col.toLowerCase();
+        return !['id', 'uuid', 'key'].some(k => colLower.endsWith(k) || colLower === k);
+      });
+      
+      setSelectedFeatures(features);
+    }
+  }, [data, selectedTarget]);
 
   /* ─── sub-components ─────────────────────────────────────── */
   const SectionLabel = ({ icon, children }) => (
@@ -272,6 +293,8 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
     const mlTargetInfo = data.ml_target || { possible_targets: [], recommended_target: "" };
     const recommended = mlTargetInfo.recommended_target;
     const currentTarget = selectedTarget || recommended || "";
+    const activeCandidate = mlTargetInfo.possible_targets.find(t => t.column === currentTarget);
+    const problemType = activeCandidate ? activeCandidate.problem_type : "classification";
     
     return (
       <Box display="flex" flexDirection="column" gap={4} sx={{ animation: "fadeUp 0.3s ease both" }}>
@@ -355,6 +378,37 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
                     </Select>
                   </FormControl>
                 </Box>
+                
+                {currentTarget && (
+                  <Box sx={{ mt: 4, p: 2.5, bgcolor: T.faint, borderRadius: "12px", border: `1px solid ${T.border}` }}>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.7rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 1.5 }}>
+                      Detected ML Task Type
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={1.5} flexWrap="wrap">
+                      <Box sx={{ 
+                        px: 1.5, 
+                        py: 0.5, 
+                        borderRadius: "8px", 
+                        bgcolor: problemType === "classification" ? T.greenSoft : T.skySoft, 
+                        border: `1px solid ${problemType === "classification" ? T.green : T.sky}30`, 
+                        fontFamily: font, 
+                        fontSize: "0.76rem", 
+                        fontWeight: 800, 
+                        color: problemType === "classification" ? T.green : T.sky,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.04em"
+                      }}>
+                        {problemType}
+                      </Box>
+                      <Typography sx={{ fontFamily: font, fontSize: "0.78rem", color: T.sub }}>
+                        {problemType === "classification" 
+                          ? "Task is to predict discrete classes or categories (e.g. yes/no, labels)." 
+                          : "Task is to predict continuous numeric quantities (e.g. scales, prices)."
+                        }
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
               </Card>
             </Grid>
 
@@ -414,6 +468,228 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
                 </Box>
               </Card>
             </Grid>
+
+            {/* Preprocessing Pipeline Config Card */}
+            <Grid item xs={12} md={7}>
+              <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", p: 3, boxShadow: "0 2px 12px rgba(15,23,42,0.06)", height: "100%" }}>
+                <Typography variant="subtitle2" sx={{ fontFamily: font, fontWeight: 800, color: T.text, mb: 1 }}>
+                  Configure Preprocessing Pipeline
+                </Typography>
+                <Typography sx={{ fontFamily: font, fontSize: "0.82rem", color: T.muted, mb: 3 }}>
+                  Customize the data pipeline. Numeric features will be imputed with mean and scaled. Categorical features will be imputed with mode and one-hot encoded.
+                </Typography>
+
+                {/* Feature Selection Checklist */}
+                <Typography sx={{ fontFamily: font, fontSize: "0.75rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 1.5 }}>
+                  Select Features to Include
+                </Typography>
+                <Box sx={{ maxHeight: 180, overflowY: "auto", border: `1px solid ${T.border}`, borderRadius: "12px", p: 2, bgcolor: T.faint, mb: 3 }}>
+                  <Grid container spacing={1}>
+                    {data.column_names.filter(col => col !== currentTarget).map((col) => {
+                      const isChecked = selectedFeatures.includes(col);
+                      return (
+                        <Grid item xs={6} sm={4} key={col}>
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedFeatures([...selectedFeatures, col]);
+                                } else {
+                                  setSelectedFeatures(selectedFeatures.filter(f => f !== col));
+                                }
+                              }}
+                              style={{ accentColor: T.accent, cursor: "pointer" }}
+                            />
+                            <Typography sx={{ fontFamily: mono, fontSize: "0.76rem", color: T.text, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}>
+                              {col}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
+                  </Grid>
+                </Box>
+
+                <Grid container spacing={3} mb={3}>
+                  {/* Scaling Selector */}
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.75rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
+                      Numeric Feature Scaling
+                    </Typography>
+                    <FormControl size="small" fullWidth>
+                      <Select
+                        value={scaling}
+                        onChange={(e) => setScaling(e.target.value)}
+                        sx={{
+                          fontFamily: font,
+                          fontSize: "0.8rem",
+                          fontWeight: 600,
+                          color: T.text,
+                          "& .MuiOutlinedInput-notchedOutline": { borderColor: T.border }
+                        }}
+                      >
+                        <MenuItem value="standard" sx={{ fontFamily: font, fontSize: "0.8rem" }}>Standard Scaler (μ=0, σ=1)</MenuItem>
+                        <MenuItem value="minmax" sx={{ fontFamily: font, fontSize: "0.8rem" }}>MinMax Scaler (0 to 1)</MenuItem>
+                        <MenuItem value="none" sx={{ fontFamily: font, fontSize: "0.8rem" }}>None (No scaling)</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Grid>
+
+                  {/* Split Ratio Slider */}
+                  <Grid item xs={12} sm={6}>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.75rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
+                      Train/Test Split: {Math.round((1 - testSize) * 100)}% / {Math.round(testSize * 100)}%
+                    </Typography>
+                    <Box display="flex" alignItems="center" gap={2} sx={{ mt: 1 }}>
+                      <input
+                        type="range"
+                        min="0.1"
+                        max="0.4"
+                        step="0.05"
+                        value={testSize}
+                        onChange={(e) => setTestSize(parseFloat(e.target.value))}
+                        style={{ flex: 1, accentColor: T.accent, cursor: "pointer" }}
+                      />
+                      <Typography sx={{ fontFamily: mono, fontSize: "0.8rem", fontWeight: 700, color: T.text }}>
+                        {Math.round(testSize * 100)}% test
+                      </Typography>
+                    </Box>
+                  </Grid>
+                </Grid>
+
+                {/* Preprocess Trigger Action */}
+                <Button
+                  variant="contained"
+                  onClick={async () => {
+                    if (!currentTarget) return;
+                    setIsPreprocessing(true);
+                    setPreprocessingResult(null);
+                    try {
+                      // Retrieve target file path
+                      const fileToProcess = data.filePath || (report && report.cleaned_filename ? `uploads/${report.cleaned_filename}` : "");
+                      const response = await fetch("http://localhost:8080/api/ml/preprocess", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          filePath: fileToProcess,
+                          target: currentTarget,
+                          features: selectedFeatures,
+                          scaling: scaling,
+                          testSize: testSize
+                        })
+                      });
+                      const resJson = await response.json();
+                      if (resJson.success) {
+                        setPreprocessingResult(resJson.data);
+                      } else {
+                        alert("Error: " + (resJson.message || "Preprocessing failed"));
+                      }
+                    } catch (e) {
+                      alert("Network Error: " + e.message);
+                    } finally {
+                      setIsPreprocessing(false);
+                    }
+                  }}
+                  disabled={isPreprocessing || selectedFeatures.length === 0 || !currentTarget}
+                  sx={{
+                    background: `linear-gradient(135deg, ${T.accent} 0%, ${T.accentMid} 100%)`,
+                    fontWeight: 700,
+                    fontFamily: font,
+                    textTransform: "none",
+                    borderRadius: "12px",
+                    px: 3,
+                    py: 1.2,
+                    boxShadow: `0 4px 12px ${T.accent}30`,
+                    "&:hover": {
+                      background: `linear-gradient(135deg, ${T.accent} 20%, #a20027 100%)`,
+                    }
+                  }}
+                >
+                  {isPreprocessing ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <CircularProgress size={16} color="inherit" />
+                      Building Preprocessing Pipeline...
+                    </Box>
+                  ) : (
+                    "Build Preprocessing Pipeline"
+                  )}
+                </Button>
+              </Card>
+            </Grid>
+
+            {/* Preprocessing Summary Outputs */}
+            {preprocessingResult ? (
+              <Grid item xs={12} md={5}>
+                <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.green}40`, borderRadius: "16px", p: 3, boxShadow: "0 2px 12px rgba(15,23,42,0.06)", height: "100%" }}>
+                  <Box display="flex" alignItems="center" gap={1.5} mb={2}>
+                    <Box sx={{ width: 24, height: 24, borderRadius: "50%", bgcolor: T.greenSoft, display: "flex", alignItems: "center", justifyContent: "center", color: T.green, fontSize: "0.85rem", fontWeight: 900 }}>
+                      ✓
+                    </Box>
+                    <Typography variant="subtitle2" sx={{ fontFamily: font, fontWeight: 800, color: T.text }}>
+                      Pipeline Generated Successfully
+                    </Typography>
+                  </Box>
+                  
+                  <Divider sx={{ borderColor: T.border, mb: 2 }} />
+                  
+                  <Box display="flex" flexDirection="column" gap={1.5}>
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography sx={{ fontFamily: font, fontSize: "0.76rem", color: T.muted }}>Train Shape:</Typography>
+                      <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", fontWeight: 700, color: T.text }}>
+                        {preprocessingResult.train_shape[0]} rows × {preprocessingResult.train_shape[1]} features
+                      </Typography>
+                    </Box>
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography sx={{ fontFamily: font, fontSize: "0.76rem", color: T.muted }}>Test Shape:</Typography>
+                      <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", fontWeight: 700, color: T.text }}>
+                        {preprocessingResult.test_shape[0]} rows × {preprocessingResult.test_shape[1]} features
+                      </Typography>
+                    </Box>
+                    <Box display="flex" justifyContent="space-between">
+                      <Typography sx={{ fontFamily: font, fontSize: "0.76rem", color: T.muted }}>Task Type:</Typography>
+                      <Typography sx={{ fontFamily: font, fontSize: "0.78rem", fontWeight: 700, color: T.text, textTransform: "capitalize" }}>
+                        {preprocessingResult.is_classification ? "Classification" : "Regression"}
+                      </Typography>
+                    </Box>
+                    
+                    {preprocessingResult.is_classification && preprocessingResult.classes && (
+                      <Box>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.76rem", color: T.muted, mb: 0.5 }}>Target Classes encoded:</Typography>
+                        <Box display="flex" gap={0.5} flexWrap="wrap">
+                          {preprocessingResult.classes.map((cls, idx) => (
+                            <Box key={cls} sx={{ px: 1, py: 0.25, bgcolor: T.faint, border: `1px solid ${T.border}`, borderRadius: "6px", fontFamily: mono, fontSize: "0.62rem", color: T.sub }}>
+                              {idx} : {cls}
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
+                    
+                    <Box>
+                      <Typography sx={{ fontFamily: font, fontSize: "0.76rem", color: T.muted, mb: 0.5 }}>Pipeline Artifacts Stored:</Typography>
+                      <Box sx={{ p: 1, bgcolor: T.faint, borderRadius: "8px", border: `1px solid ${T.border}` }}>
+                        <Typography sx={{ fontFamily: mono, fontSize: "0.62rem", color: T.muted, wordBreak: "break-all" }}>
+                          · preprocessor: <strong>{preprocessingResult.preprocessor_file}</strong><br/>
+                          {preprocessingResult.label_encoder_file && (
+                            <>· label_encoder: <strong>{preprocessingResult.label_encoder_file}</strong></>
+                          )}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Card>
+              </Grid>
+            ) : (
+              <Grid item xs={12} md={5}>
+                <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderStyle: "dashed", borderRadius: "16px", p: 3, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", height: "100%", minHeight: 250 }}>
+                  <Typography sx={{ fontFamily: font, fontSize: "0.82rem", color: T.muted }}>
+                    Configure the preprocessing parameters and click <strong>Build Preprocessing Pipeline</strong> to fit transformations and generate train/test splits.
+                  </Typography>
+                </Card>
+              </Grid>
+            )}
           </Grid>
         </Box>
       </Box>

@@ -4,7 +4,7 @@ def detect_targets(df):
     """
     Scans the DataFrame columns and identifies potential targets for ML modeling.
     Returns lists of candidate target columns sorted by suitability confidence,
-    along with a single default recommendation.
+    along with a single default recommendation and detected problem type.
     """
     possible_targets = []
     
@@ -81,6 +81,9 @@ def detect_targets(df):
         # Limit boundary between 0 and 100
         score = max(0, min(100, score))
         
+        # Determine problem type based on datatype and unique values count
+        problem_type = "classification" if (is_categorical or unique_count <= 10) else "regression"
+        
         # Only suggest targets that meet a threshold confidence (e.g. 40)
         if score >= 40:
             possible_targets.append({
@@ -89,15 +92,18 @@ def detect_targets(df):
                 "unique_count": unique_count,
                 "missing_count": missing_count,
                 "score": score,
-                "is_categorical": is_categorical
+                "is_categorical": is_categorical,
+                "problem_type": problem_type
             })
             
     # Sort possible targets by confidence score descending
     possible_targets.sort(key=lambda x: x["score"], reverse=True)
     
     recommended = possible_targets[0]["column"] if possible_targets else None
+    recommended_problem = possible_targets[0]["problem_type"] if possible_targets else None
     
     return {
         "possible_targets": possible_targets,
-        "recommended_target": recommended
+        "recommended_target": recommended,
+        "recommended_problem_type": recommended_problem
     }

@@ -3,6 +3,7 @@ import cors from "cors";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middlewares/errorMiddleware.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import mlRoutes from "./routes/mlRoutes.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // routes
 app.use("/api/upload", uploadRoutes);
+app.use("/api/ml", mlRoutes);
 
 // test route
 app.get("/", (req, res) => {

@@ -459,10 +459,10 @@ House_Price
 
 ### Tasks
 
-- [ ] Implement classification detection.
-- [ ] Implement regression detection.
-- [ ] Handle edge cases.
-- [ ] Display detected problem type.
+- [x] Implement classification detection.
+- [x] Implement regression detection.
+- [x] Handle edge cases.
+- [x] Display detected problem type.
 
 ---
 
@@ -480,15 +480,15 @@ ai/machine_learning/preprocessing.py
 
 ### Tasks
 
-- [ ] Separate features and target.
-- [ ] Detect numeric features.
-- [ ] Detect categorical features.
-- [ ] Handle missing values.
-- [ ] Encode categorical features.
-- [ ] Scale numerical features when required.
-- [ ] Split train/test data.
-- [ ] Prevent data leakage.
-- [ ] Store preprocessing pipeline.
+- [x] Separate features and target.
+- [x] Detect numeric features.
+- [x] Detect categorical features.
+- [x] Handle missing values.
+- [x] Encode categorical features.
+- [x] Scale numerical features when required.
+- [x] Split train/test data.
+- [x] Prevent data leakage.
+- [x] Store preprocessing pipeline.
 
 ### Pipeline
 
