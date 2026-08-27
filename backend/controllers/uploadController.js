@@ -1,5 +1,15 @@
+import crypto from "crypto";
 import { runPythonAnalysis } from "../services/pythonService.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
+
+const formatBytes = (bytes, decimals = 2) => {
+  if (!bytes) return "0 Bytes";
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+};
 
 export const uploadFile = async (req, res, next) => {
   try {
@@ -19,7 +29,14 @@ export const uploadFile = async (req, res, next) => {
       throw error;
     }
 
+    const datasetId = crypto.randomUUID();
+
     return sendSuccess(res, "File uploaded & analyzed successfully", {
+      datasetId,
+      filename: req.file.originalname,
+      rows: analysis.rows,
+      columns: analysis.columns,
+      size: formatBytes(req.file.size),
       filePath,
       analysis,
     });

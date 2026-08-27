@@ -14,8 +14,21 @@ if len(sys.argv) < 2:
 file_path = sys.argv[1]
 
 try:
-    # 📂 Load data (automatically detect delimiter like tab, comma, semicolon)
-    df = pd.read_csv(file_path, sep=None, engine='python')
+    # 📂 Load data (automatically detect delimiter and try multiple encodings)
+    encodings = ['utf-8', 'utf-8-sig', 'latin1', 'cp1252', 'utf-16']
+    df = None
+    last_err = None
+
+    for encoding in encodings:
+        try:
+            df = pd.read_csv(file_path, sep=None, engine='python', encoding=encoding)
+            break
+        except Exception as e:
+            last_err = e
+            continue
+
+    if df is None:
+        raise Exception(f"Failed to parse file with supported encodings. Last error: {str(last_err)}")
 
     # 🧹 Clean data
     df = clean_data(df)
