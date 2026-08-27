@@ -25,9 +25,81 @@ const PALETTES = {
   neon: ["#FF2E63", "#08D9D6", "#252A34", "#EAEAEA", "#ff6688", "#5cd6d4"]
 };
 
+// 📦 BoxPlot Custom Component
+const BoxPlot = ({ box, label, color, darkMode }) => {
+  const { min, q1, median, q3, max } = box;
+  const range = max - min;
+  const scale = (val) => {
+    if (range === 0) return 50;
+    return ((val - min) / range) * 80 + 10; // Scale from 10% to 90% for padding margins
+  };
+
+  const q1Pos = `${scale(q1)}%`;
+  const medianPos = `${scale(median)}%`;
+  const q3Pos = `${scale(q3)}%`;
+  const minPos = `${scale(min)}%`;
+  const maxPos = `${scale(max)}%`;
+
+  const labelStyle = {
+    fontSize: "9px",
+    fontFamily: "'IBM Plex Mono', monospace",
+    fill: darkMode ? "#9ca3af" : "#64748b",
+    fontWeight: 600
+  };
+
+  return (
+    <Box sx={{ p: 2, bgcolor: darkMode ? "#181818" : "#f8fafc", borderRadius: "10px", border: `1px solid ${darkMode ? "#2d2d2d" : "#e2e8f0"}`, height: "100%", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      {/* 5-number Stats Grid */}
+      <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gap={0.5} mb={3.5} textAlign="center">
+        <Box>
+          <Typography variant="caption" sx={{ fontSize: "0.58rem", fontWeight: 700, color: "text.secondary", display: "block" }}>MIN</Typography>
+          <Typography sx={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem", fontWeight: 700 }}>{min.toFixed(2)}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ fontSize: "0.58rem", fontWeight: 700, color: "text.secondary", display: "block" }}>Q1 (25%)</Typography>
+          <Typography sx={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem", fontWeight: 700 }}>{q1.toFixed(2)}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ fontSize: "0.58rem", fontWeight: 700, color: color, display: "block" }}>MEDIAN</Typography>
+          <Typography sx={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem", fontWeight: 800, color: color }}>{median.toFixed(2)}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ fontSize: "0.58rem", fontWeight: 700, color: "text.secondary", display: "block" }}>Q3 (75%)</Typography>
+          <Typography sx={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem", fontWeight: 700 }}>{q3.toFixed(2)}</Typography>
+        </Box>
+        <Box>
+          <Typography variant="caption" sx={{ fontSize: "0.58rem", fontWeight: 700, color: "text.secondary", display: "block" }}>MAX</Typography>
+          <Typography sx={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: "0.72rem", fontWeight: 700 }}>{max.toFixed(2)}</Typography>
+        </Box>
+      </Box>
+
+      {/* SVG Box whisker */}
+      <svg width="100%" height="70" style={{ overflow: "visible" }}>
+        {/* Whiskers */}
+        <line x1={minPos} y1="35" x2={maxPos} y2="35" stroke={darkMode ? "#4b5563" : "#cbd5e1"} strokeWidth="2" strokeDasharray="3 3" />
+        <line x1={minPos} y1="20" x2={minPos} y2="50" stroke={color} strokeWidth="2.5" />
+        <line x1={maxPos} y1="20" x2={maxPos} y2="50" stroke={color} strokeWidth="2.5" />
+
+        {/* Box (IQR) */}
+        <rect x={q1Pos} y="15" width={`${scale(q3) - scale(q1)}%`} height="40" fill={color} fillOpacity="0.15" stroke={color} strokeWidth="2" rx="2" />
+
+        {/* Median Line */}
+        <line x1={medianPos} y1="15" x2={medianPos} y2="55" stroke={color} strokeWidth="3.5" />
+
+        {/* Value markings */}
+        <text x={minPos} y="10" textAnchor="middle" style={labelStyle}>{min.toFixed(1)}</text>
+        <text x={q1Pos} y="68" textAnchor="middle" style={labelStyle}>{q1.toFixed(1)}</text>
+        <text x={medianPos} y="10" textAnchor="middle" style={{ ...labelStyle, fill: color, fontWeight: 800 }}>{median.toFixed(1)}</text>
+        <text x={q3Pos} y="68" textAnchor="middle" style={labelStyle}>{q3.toFixed(1)}</text>
+        <text x={maxPos} y="10" textAnchor="middle" style={labelStyle}>{max.toFixed(1)}</text>
+      </svg>
+    </Box>
+  );
+};
+
 const Charts = ({ charts, darkMode }) => {
   const [tabValue, setTabValue] = useState(0);
-  const [paletteName, setPaletteName] = useState(darkMode ? "crimson" : "neon");
+  const [paletteName, setPaletteName] = useState(darkMode ? "crimson" : "indigo");
   const [chartTypes, setChartTypes] = useState({});
   const [distFilter, setDistFilter] = useState("all");
   const [catFilter, setCatFilter] = useState("all");
@@ -41,7 +113,8 @@ const Charts = ({ charts, darkMode }) => {
     );
   }
 
-  const palette = PALETTES[paletteName] || PALETTES[darkMode ? "crimson" : "neon"];
+  const palette = PALETTES[paletteName] || PALETTES[darkMode ? "crimson" : "indigo"];
+  const hasLineChart = !!charts._line;
 
   // Dynamic Theme Colors
   const C = {
@@ -91,7 +164,7 @@ const Charts = ({ charts, darkMode }) => {
 
   // Helper: Download CSV
   const downloadCSV = (data, name) => {
-    const headers = ["Label", "Frequency"];
+    const headers = ["Label", "Value"];
     const rows = data.map(item => [item.name, item.value]);
     const csvContent = "data:text/csv;charset=utf-8," 
       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -104,7 +177,7 @@ const Charts = ({ charts, darkMode }) => {
     document.body.removeChild(link);
   };
 
-  // 1. Distributions Tab (Numeric columns)
+  // 1. Distributions Tab (Histogram & Box Plot)
   const renderDistributions = () => {
     const numericEntries = Object.entries(charts).filter(
       ([col, chart]) => chart?.type === "histogram" && !col.startsWith("_")
@@ -170,7 +243,7 @@ const Charts = ({ charts, darkMode }) => {
                   <CardContent>
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.textTitle, textTransform: "capitalize" }}>
-                        {col.replace(/_/g, " ")} Distribution
+                        {chart.title || `${col.replace(/_/g, " ")} Distribution`}
                       </Typography>
                       
                       <Box display="flex" gap={1} alignItems="center">
@@ -184,6 +257,10 @@ const Charts = ({ charts, darkMode }) => {
                             "& .MuiToggleButton-root": {
                               color: darkMode ? "#9ca3af" : "#64748b",
                               borderColor: darkMode ? "#374151" : "#e2e8f0",
+                              fontSize: "0.6rem",
+                              fontWeight: 700,
+                              py: 0.3,
+                              px: 1.2,
                               "&.Mui-selected": {
                                 color: palette[0],
                                 bgcolor: darkMode ? "rgba(99, 102, 241, 0.15)" : "rgba(79, 70, 229, 0.05)"
@@ -192,46 +269,57 @@ const Charts = ({ charts, darkMode }) => {
                           }}
                         >
                           <ToggleButton value="bar">
-                            <BarChartIcon fontSize="small" />
+                            <MuiTooltip title="Histogram" arrow><BarChartIcon fontSize="small" /></MuiTooltip>
                           </ToggleButton>
                           <ToggleButton value="area">
-                            <ShowChartIcon fontSize="small" />
+                            <MuiTooltip title="Area Chart" arrow><ShowChartIcon fontSize="small" /></MuiTooltip>
                           </ToggleButton>
+                          {chart.boxplot && (
+                            <ToggleButton value="boxplot" sx={{ fontSize: "0.58rem" }}>
+                              BOX
+                            </ToggleButton>
+                          )}
                         </ToggleButtonGroup>
                       </Box>
                     </Box>
 
-                    <Box id={chartId} sx={{ width: "100%", height: 260 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        {currentType === "area" ? (
-                          <AreaChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                            <defs>
-                              <linearGradient id={`color-${col}`} x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor={palette[0]} stopOpacity={0.4}/>
-                                <stop offset="95%" stopColor={palette[0]} stopOpacity={0.0}/>
-                              </linearGradient>
-                            </defs>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.gridStroke} />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
-                            <Tooltip contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
-                            <Area type="monotone" dataKey="value" stroke={palette[0]} strokeWidth={2} fillOpacity={1} fill={`url(#color-${col})`} />
-                          </AreaChart>
-                        ) : (
-                          <BarChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.gridStroke} />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
-                            <Tooltip cursor={{ fill: darkMode ? "rgba(255,255,255,0.03)" : "#f8fafc" }} contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
-                            <Bar dataKey="value" fill={palette[0]} radius={[4, 4, 0, 0]} barSize={Math.max(10, Math.min(35, 180 / data.length))} />
-                          </BarChart>
-                        )}
-                      </ResponsiveContainer>
+                    <Box id={chartId} sx={{ width: "100%", height: 260, display: "flex", flexDirection: "column", justifyContent: "center" }}>
+                      {currentType === "boxplot" && chart.boxplot ? (
+                        <BoxPlot box={chart.boxplot} label={col} color={palette[0]} darkMode={darkMode} />
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {currentType === "area" ? (
+                            <AreaChart data={data} margin={{ top: 15, right: 10, left: -20, bottom: 15 }}>
+                              <defs>
+                                <linearGradient id={`color-${col}`} x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor={palette[0]} stopOpacity={0.4}/>
+                                  <stop offset="95%" stopColor={palette[0]} stopOpacity={0.0}/>
+                                </linearGradient>
+                              </defs>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.gridStroke} />
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.x_label || col, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.y_label || "Frequency", angle: -90, position: "insideLeft", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                              <Tooltip contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
+                              <Area type="monotone" dataKey="value" stroke={palette[0]} strokeWidth={2} fillOpacity={1} fill={`url(#color-${col})`} />
+                            </AreaChart>
+                          ) : (
+                            <BarChart data={data} margin={{ top: 15, right: 10, left: -20, bottom: 15 }}>
+                              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.gridStroke} />
+                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.x_label || col, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                              <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.y_label || "Frequency", angle: -90, position: "insideLeft", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                              <Tooltip cursor={{ fill: darkMode ? "rgba(255,255,255,0.03)" : "#f8fafc" }} contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
+                              <Bar dataKey="value" fill={palette[0]} radius={[4, 4, 0, 0]} barSize={Math.max(10, Math.min(35, 180 / data.length))} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      )}
                     </Box>
                   </CardContent>
                   <CardActions sx={{ justifyContent: "flex-end", bgcolor: C.actionsBg, px: 2, py: 1, borderTop: C.actionsBorder }}>
-                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadCSV(data, col)} sx={{ textTransform: "none", fontSize: "0.75rem" }}>Data (CSV)</Button>
-                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, col)} sx={{ textTransform: "none", fontSize: "0.75rem" }}>Chart (SVG)</Button>
+                    {currentType !== "boxplot" && (
+                      <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadCSV(data, col)} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Data (CSV)</Button>
+                    )}
+                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, col)} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Chart (SVG)</Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -242,7 +330,7 @@ const Charts = ({ charts, darkMode }) => {
     );
   };
 
-  // 2. Categorical Analysis Tab (Categorical columns with bar/pie)
+  // 2. Categorical Analysis Tab (Bar vs Pie)
   const renderCategorical = () => {
     const catEntries = Object.entries(charts).filter(
       ([col, chart]) => (chart?.type === "bar" || chart?.type === "pie") && !col.startsWith("_")
@@ -308,7 +396,7 @@ const Charts = ({ charts, darkMode }) => {
                   <CardContent>
                     <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.textTitle, textTransform: "capitalize" }}>
-                        {col.replace(/_/g, " ")} Breakdown
+                        {chart.title || `${col.replace(/_/g, " ")} Breakdown`}
                       </Typography>
                       
                       <Box display="flex" gap={1} alignItems="center">
@@ -361,10 +449,10 @@ const Charts = ({ charts, darkMode }) => {
                             <Legend verticalAlign="bottom" height={36} iconSize={10} iconType="circle" wrapperStyle={{ fontSize: "10px", marginTop: "10px", color: C.textTitle }} />
                           </PieChart>
                         ) : (
-                          <BarChart data={data} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                          <BarChart data={data} margin={{ top: 15, right: 10, left: -20, bottom: 15 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={C.gridStroke} />
-                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
-                            <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} />
+                            <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.x_label || col, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                            <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: chart.y_label || "Count", angle: -90, position: "insideLeft", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
                             <Tooltip cursor={{ fill: darkMode ? "rgba(255,255,255,0.03)" : "#f8fafc" }} contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
                             <Bar dataKey="value" radius={[4, 4, 0, 0]} barSize={Math.max(12, Math.min(45, 200 / data.length))}>
                               {data.map((entry, i) => (
@@ -377,8 +465,8 @@ const Charts = ({ charts, darkMode }) => {
                     </Box>
                   </CardContent>
                   <CardActions sx={{ justifyContent: "flex-end", bgcolor: C.actionsBg, px: 2, py: 1, borderTop: C.actionsBorder }}>
-                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadCSV(data, col)} sx={{ textTransform: "none", fontSize: "0.75rem" }}>Data (CSV)</Button>
-                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, col)} sx={{ textTransform: "none", fontSize: "0.75rem" }}>Chart (SVG)</Button>
+                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadCSV(data, col)} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Data (CSV)</Button>
+                    <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, col)} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Chart (SVG)</Button>
                   </CardActions>
                 </Card>
               </Grid>
@@ -389,7 +477,51 @@ const Charts = ({ charts, darkMode }) => {
     );
   };
 
-  // 3. Relationships Tab (Scatter plot)
+  // 3. Chronological Trends Tab (Line Chart)
+  const renderTrends = () => {
+    const lineChart = charts._line;
+    if (!lineChart) return null;
+    const data = lineChart.data.map(d => ({ name: d.x, value: d.y }));
+    const chartId = "chart-line-trend";
+
+    return (
+      <Box>
+        <Card variant="outlined" sx={{ borderRadius: "12px", border: C.cardBorder, bgcolor: C.cardBg, mb: 3 }}>
+          <CardContent>
+            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: C.textTitle, mb: 1 }}>
+              {lineChart.title}
+            </Typography>
+            <Typography variant="caption" sx={{ color: C.textSub, mb: 2, display: "block" }}>
+              Time-series line chart depicting trend of numeric attribute <strong>{lineChart.y_axis}</strong> sorted chronologically by date/time variable <strong>{lineChart.x_axis}</strong>.
+            </Typography>
+            <Box id={chartId} sx={{ width: "100%", height: 350 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data} margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
+                  <defs>
+                    <linearGradient id="trendGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={palette[0]} stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor={palette[0]} stopOpacity={0.0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.gridStroke} />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: lineChart.x_axis, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: lineChart.y_axis, angle: -90, position: "insideLeft", offset: 0, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                  <Tooltip contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
+                  <Area type="monotone" dataKey="value" stroke={palette[0]} strokeWidth={2.5} fillOpacity={1} fill="url(#trendGrad)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Box>
+          </CardContent>
+          <CardActions sx={{ justifyContent: "flex-end", bgcolor: C.actionsBg, px: 2, py: 1, borderTop: C.actionsBorder }}>
+            <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadCSV(data, "trend")} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Data (CSV)</Button>
+            <Button size="small" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, "trend")} sx={{ textTransform: "none", fontSize: "0.72rem" }}>Chart (SVG)</Button>
+          </CardActions>
+        </Card>
+      </Box>
+    );
+  };
+
+  // 4. Relationships Tab (Scatter plot)
   const [xAxisCol, setXAxisCol] = useState("");
   const [yAxisCol, setYAxisCol] = useState("");
 
@@ -470,22 +602,22 @@ const Charts = ({ charts, darkMode }) => {
             </FormControl>
           </Grid>
           <Grid item xs={12} sm={4} display="flex" justifyContent={{ xs: "flex-start", sm: "flex-end" }} gap={1}>
-            <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={downloadScatterCSV} sx={{ textTransform: "none", fontSize: "0.75rem", color: palette[0], borderColor: palette[0] }}>CSV</Button>
-            <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, `scatter_${activeX}_vs_${activeY}`)} sx={{ textTransform: "none", fontSize: "0.75rem", color: palette[0], borderColor: palette[0] }}>SVG</Button>
+            <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={downloadScatterCSV} sx={{ textTransform: "none", fontSize: "0.72rem", color: palette[0], borderColor: palette[0] }}>CSV</Button>
+            <Button size="small" variant="outlined" startIcon={<DownloadIcon />} onClick={() => downloadSVG(chartId, `scatter_${activeX}_vs_${activeY}`)} sx={{ textTransform: "none", fontSize: "0.72rem", color: palette[0], borderColor: palette[0] }}>SVG</Button>
           </Grid>
         </Grid>
 
         <Card variant="outlined" sx={{ borderRadius: "12px", border: C.cardBorder, bgcolor: C.cardBg }}>
           <CardContent>
             <Typography variant="body2" sx={{ mb: 2, fontWeight: 600, color: C.textSub }}>
-              Scatter Plot: {activeX.toUpperCase()} vs {activeY.toUpperCase()}
+              {scatterData.title || `Scatter Plot: ${activeX.toUpperCase()} vs ${activeY.toUpperCase()}`}
             </Typography>
             <Box id={chartId} sx={{ width: "100%", height: 350 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <ScatterChart margin={{ top: 15, right: 20, bottom: 15, left: -10 }}>
+                <ScatterChart margin={{ top: 15, right: 20, bottom: 20, left: -10 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke={C.gridStroke} />
-                  <XAxis type="number" dataKey={activeX} name={activeX} axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} label={{ value: activeX, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 11, fontWeight: 600 }} />
-                  <YAxis type="number" dataKey={activeY} name={activeY} axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 10 }} label={{ value: activeY, angle: -90, position: "insideLeft", offset: 0, fill: C.textSub, fontSize: 11, fontWeight: 600 }} />
+                  <XAxis type="number" dataKey={activeX} name={activeX} axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: activeX, position: "insideBottom", offset: -5, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
+                  <YAxis type="number" dataKey={activeY} name={activeY} axisLine={false} tickLine={false} tick={{ fill: C.axisFill, fontSize: 9 }} label={{ value: activeY, angle: -90, position: "insideLeft", offset: 0, fill: C.textSub, fontSize: 10, fontWeight: 600 }} />
                   <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ borderRadius: "8px", border: C.tooltipBorder, boxShadow: "0 4px 12px rgba(0,0,0,0.15)", fontSize: "12px", backgroundColor: C.tooltipBg, color: C.tooltipColor }} />
                   <Scatter name="Data Points" data={scatterData.data} fill={palette[0]} opacity={0.7} />
                 </ScatterChart>
@@ -497,7 +629,7 @@ const Charts = ({ charts, darkMode }) => {
     );
   };
 
-  // 4. Correlation Heatmap Tab
+  // 5. Correlation Heatmap Tab
   const renderHeatmap = () => {
     const corrData = charts._correlation;
     if (!corrData || !corrData.matrix) {
@@ -665,6 +797,9 @@ const Charts = ({ charts, darkMode }) => {
         >
           <Tab icon={<BarChartIcon fontSize="small" />} iconPosition="start" label="Distributions" />
           <Tab icon={<PieChartIcon fontSize="small" />} iconPosition="start" label="Categorical" />
+          {hasLineChart && (
+            <Tab icon={<ShowChartIcon fontSize="small" />} iconPosition="start" label="Trends" />
+          )}
           <Tab icon={<BubbleChartIcon fontSize="small" />} iconPosition="start" label="Relationships" />
           <Tab icon={<GridOnIcon fontSize="small" />} iconPosition="start" label="Correlations" />
         </Tabs>
@@ -699,8 +834,9 @@ const Charts = ({ charts, darkMode }) => {
       <Box sx={{ mt: 1 }}>
         {tabValue === 0 && renderDistributions()}
         {tabValue === 1 && renderCategorical()}
-        {tabValue === 2 && renderRelationships()}
-        {tabValue === 3 && renderHeatmap()}
+        {hasLineChart && tabValue === 2 && renderTrends()}
+        {tabValue === (hasLineChart ? 3 : 2) && renderRelationships()}
+        {tabValue === (hasLineChart ? 4 : 3) && renderHeatmap()}
       </Box>
     </Box>
   );

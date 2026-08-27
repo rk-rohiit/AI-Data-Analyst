@@ -23,15 +23,25 @@ const getCategoryMeta = (darkMode) => ({
     bg: darkMode ? "rgba(234, 88, 12, 0.18)" : "#ffedd5", 
     icon: <TimelineIcon sx={{ fontSize: "0.9rem" }} /> 
   },
+  kurtosis: { 
+    color: darkMode ? "#c084fc" : "#7c3aed", 
+    bg: darkMode ? "rgba(124, 58, 237, 0.18)" : "#f3e8ff", 
+    icon: <TimelineIcon sx={{ fontSize: "0.9rem" }} /> 
+  },
   correlation: { 
     color: darkMode ? "#34d399" : "#059669", 
     bg: darkMode ? "rgba(5, 150, 105, 0.18)" : "#ecfdf5", 
     icon: <CompareArrowsIcon sx={{ fontSize: "0.9rem" }} /> 
   },
   dominance: { 
-    color: darkMode ? "#c084fc" : "#7c3aed", 
-    bg: darkMode ? "rgba(124, 58, 237, 0.18)" : "#f3e8ff", 
+    color: darkMode ? "#a855f7" : "#6b21a8", 
+    bg: darkMode ? "rgba(168, 85, 247, 0.18)" : "#f3e8ff", 
     icon: <StarIcon sx={{ fontSize: "0.9rem" }} /> 
+  },
+  imbalance: { 
+    color: darkMode ? "#f43f5e" : "#be123c", 
+    bg: darkMode ? "rgba(244, 63, 94, 0.18)" : "#ffe4e6", 
+    icon: <WarningIcon sx={{ fontSize: "0.9rem" }} /> 
   },
   default: { 
     color: darkMode ? "#9ca3af" : "#4b5563", 

@@ -272,35 +272,35 @@ ai/eda/
 
 ### Numeric Analysis
 
-- [ ] Mean
-- [ ] Median
-- [ ] Mode
-- [ ] Minimum
-- [ ] Maximum
-- [ ] Standard deviation
-- [ ] Variance
-- [ ] Quartiles
-- [ ] IQR
-- [ ] Skewness
-- [ ] Kurtosis
+- [x] Mean
+- [x] Median
+- [x] Mode
+- [x] Minimum
+- [x] Maximum
+- [x] Standard deviation
+- [x] Variance
+- [x] Quartiles
+- [x] IQR
+- [x] Skewness
+- [x] Kurtosis
 
 ### Categorical Analysis
 
-- [ ] Unique values
-- [ ] Frequency
-- [ ] Percentage distribution
-- [ ] Dominant category
-- [ ] Cardinality
+- [x] Unique values
+- [x] Frequency
+- [x] Percentage distribution
+- [x] Dominant category
+- [x] Cardinality
 
 ### Dataset-Level Analysis
 
-- [ ] Number of rows
-- [ ] Number of columns
-- [ ] Numeric columns
-- [ ] Categorical columns
-- [ ] Missing values
-- [ ] Duplicate rows
-- [ ] Correlation matrix
+- [x] Number of rows
+- [x] Number of columns
+- [x] Numeric columns
+- [x] Categorical columns
+- [x] Missing values
+- [x] Duplicate rows
+- [x] Correlation matrix
 
 ---
 
@@ -312,14 +312,14 @@ Convert raw statistics into meaningful observations.
 
 ### Implement
 
-- [ ] Skewness detection.
-- [ ] Kurtosis detection.
-- [ ] IQR outlier detection.
-- [ ] Pearson correlation.
-- [ ] Strong positive correlation detection.
-- [ ] Strong negative correlation detection.
-- [ ] Category dominance.
-- [ ] Class imbalance detection.
+- [x] Skewness detection.
+- [x] Kurtosis detection.
+- [x] IQR outlier detection.
+- [x] Pearson correlation.
+- [x] Strong positive correlation detection.
+- [x] Strong negative correlation detection.
+- [x] Category dominance.
+- [x] Class imbalance detection.
 
 ### Example
 
@@ -342,13 +342,13 @@ Automatically select useful charts based on dataset structure.
 
 ### Charts
 
-- [ ] Histogram
-- [ ] Box Plot
-- [ ] Bar Chart
-- [ ] Pie Chart
-- [ ] Scatter Plot
-- [ ] Line Chart
-- [ ] Correlation Heatmap
+- [x] Histogram
+- [x] Box Plot
+- [x] Bar Chart
+- [x] Pie Chart
+- [x] Scatter Plot
+- [x] Line Chart
+- [x] Correlation Heatmap
 
 ### Automatic Recommendation
 
@@ -371,12 +371,12 @@ Multiple Numeric Variables
 
 ### Tasks
 
-- [ ] Improve chart recommendations.
-- [ ] Generate meaningful titles.
-- [ ] Generate axis labels.
-- [ ] Add responsive charts.
-- [ ] Support dark/light themes.
-- [ ] Add chart export.
+- [x] Improve chart recommendations.
+- [x] Generate meaningful titles.
+- [x] Generate axis labels.
+- [x] Add responsive charts.
+- [x] Support dark/light themes.
+- [x] Add chart export.
 
 ---
 
@@ -394,12 +394,12 @@ ai/machine_learning/target_detection.py
 
 ### Analyze
 
-- [ ] Datatype
-- [ ] Unique values
-- [ ] Cardinality
-- [ ] Missing values
-- [ ] Column name
-- [ ] Distribution
+- [x] Datatype
+- [x] Unique values
+- [x] Cardinality
+- [x] Missing values
+- [x] Column name
+- [x] Distribution
 
 ### Example
 

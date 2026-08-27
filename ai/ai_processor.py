@@ -40,15 +40,15 @@ try:
     from data_quality.quality_scorer import calculate_quality_score
     quality_score = calculate_quality_score(df_raw, cleaning_report)
 
-    # 📊 Summary
-    desc = df.describe(include='all').fillna("").to_dict()
-    null_counts = df.isnull().sum().to_dict()
-    
-    summary = {}
-    for col in df.columns:
-        summary[col] = desc.get(col, {})
-        summary[col]["missing"] = int(null_counts.get(col, 0))
-        summary[col]["dtype"] = str(df[col].dtype)
+    # 📊 Run Automated EDA
+    from eda.analyzer import run_eda
+    eda_data = run_eda(df)
+    summary = eda_data["summary"]
+    dataset_level = eda_data["dataset"]
+
+    # 🤖 ML Target Detection
+    from machine_learning.target_detection import detect_targets
+    ml_target = detect_targets(df_raw)
 
     # 📋 Preview
     preview = df.head(20).to_dict(orient="records")
@@ -69,7 +69,9 @@ try:
         "charts": charts,
         "insights": insights,
         "cleaning_report": cleaning_report,
-        "quality_score": quality_score
+        "quality_score": quality_score,
+        "dataset_level": dataset_level,
+        "ml_target": ml_target
     }
 
     print(json.dumps(result))

@@ -1,4 +1,4 @@
-import { Grid, Typography, Box, TextField, InputAdornment, Button, Tabs, Tab, Card, CardContent, Alert, AlertTitle, List, ListItem, ListItemIcon, ListItemText, Divider, CircularProgress } from "@mui/material";
+import { Grid, Typography, Box, TextField, InputAdornment, Button, Tabs, Tab, Card, CardContent, Alert, AlertTitle, List, ListItem, ListItemIcon, ListItemText, Divider, CircularProgress, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import TableChartIcon from "@mui/icons-material/TableChart";
@@ -58,6 +58,7 @@ const formatValue = (val) => {
 const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   const T = getTokens(darkMode);
   const [tabIndex, setTabIndex] = useState(0);
+  const [selectedTarget, setSelectedTarget] = useState("");
 
   /* ─── sub-components ─────────────────────────────────────── */
   const SectionLabel = ({ icon, children }) => (
@@ -119,6 +120,7 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   );
 
   const ColumnCard = ({ col, stats }) => {
+    const [expanded, setExpanded] = useState(false);
     const isNumeric = stats.mean !== "";
     const accent = isNumeric ? T.accent : T.warm;
     const softBg = isNumeric ? T.accentSoft : T.warmSoft;
@@ -132,12 +134,14 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
           height: "100%",
           boxShadow: "0 1px 3px rgba(15,23,42,0.05)",
           transition: "transform 0.18s ease, box-shadow 0.18s ease",
+          cursor: "pointer",
           "&:hover": {
             transform: "translateY(-2px)",
             boxShadow: `0 8px 24px ${accent}18`,
             borderColor: `${accent}60`,
           },
         }}
+        onClick={() => setExpanded(!expanded)}
       >
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={1.5}>
           <Typography sx={{ fontFamily: mono, fontSize: "0.76rem", fontWeight: 600, color: T.text, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "72%" }}>
@@ -158,7 +162,7 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
             <Pill label="Max" value={formatValue(stats.max)} />
             {stats.missing !== undefined && (
               <Box sx={{ gridColumn: "span 2" }}>
-                <Pill label="Missing Values" value={formatValue(stats.missing)} />
+                <Pill label="Missing Values" value={`${formatValue(stats.missing)} (${stats.missing_pct}%)`} />
               </Box>
             )}
           </Box>
@@ -169,11 +173,66 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
             <Pill label="Freq" value={formatValue(stats.freq)} />
             {stats.missing !== undefined && (
               <Box sx={{ gridColumn: "span 3" }}>
-                <Pill label="Missing Values" value={formatValue(stats.missing)} />
+                <Pill label="Missing Values" value={`${formatValue(stats.missing)} (${stats.missing_pct}%)`} />
               </Box>
             )}
           </Box>
         )}
+
+        {/* Collapsible Expanded Panel */}
+        {expanded && (
+          <Box mt={2} sx={{ animation: "fadeUp 0.2s ease both" }}>
+            <Divider sx={{ borderColor: T.border, my: 1.5 }} />
+            
+            {isNumeric ? (
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={1}>
+                <Pill label="Median" value={formatValue(stats.median)} />
+                <Pill label="Mode" value={formatValue(stats.mode)} />
+                <Pill label="Variance" value={formatValue(stats.var)} />
+                <Pill label="IQR" value={formatValue(stats.iqr)} />
+                <Pill label="Skewness" value={formatValue(stats.skew)} />
+                <Pill label="Kurtosis" value={formatValue(stats.kurt)} />
+                <Box sx={{ gridColumn: "span 2", mt: 1 }}>
+                  <Typography sx={{ fontFamily: mono, fontSize: "0.55rem", color: T.muted, textTransform: "uppercase", mb: 0.5, letterSpacing: "0.08em" }}>
+                    Quartiles Summary
+                  </Typography>
+                  <Box display="flex" justifyContent="space-between" bgcolor={T.faint} p={1} borderRadius="8px" border={`1px solid ${T.border}`}>
+                    <Typography sx={{ fontFamily: mono, fontSize: "0.72rem", color: T.sub }}>Q1: <strong>{formatValue(stats.q1)}</strong></Typography>
+                    <Typography sx={{ fontFamily: mono, fontSize: "0.72rem", color: T.sub }}>Q2: <strong>{formatValue(stats.q2)}</strong></Typography>
+                    <Typography sx={{ fontFamily: mono, fontSize: "0.72rem", color: T.sub }}>Q3: <strong>{formatValue(stats.q3)}</strong></Typography>
+                  </Box>
+                </Box>
+              </Box>
+            ) : (
+              <Box display="flex" flexDirection="column" gap={1}>
+                <Typography sx={{ fontFamily: font, fontSize: "0.62rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 0.5 }}>
+                  Top Category Distribution
+                </Typography>
+                {Object.entries(stats.percentage_distribution || {}).map(([category, percentage]) => (
+                  <Box key={category}>
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={0.25}>
+                      <Typography sx={{ fontFamily: font, fontSize: "0.7rem", color: T.sub, maxWidth: "70%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {category}
+                      </Typography>
+                      <Typography sx={{ fontFamily: mono, fontSize: "0.7rem", fontWeight: 700, color: T.text }}>
+                        {percentage}%
+                      </Typography>
+                    </Box>
+                    <Box sx={{ width: "100%", height: 4, bgcolor: T.faint, borderRadius: 2, overflow: "hidden" }}>
+                      <Box sx={{ width: `${percentage}%`, height: "100%", bgcolor: T.warm, borderRadius: 2 }} />
+                    </Box>
+                  </Box>
+                ))}
+              </Box>
+            )}
+          </Box>
+        )}
+
+        <Box display="flex" justifyContent="center" mt={expanded ? 2 : 1}>
+          <Typography sx={{ fontFamily: font, fontSize: "0.62rem", fontWeight: 700, color: accent, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+            {expanded ? "Show Less ▲" : "Show More Stats ▼"}
+          </Typography>
+        </Box>
       </Box>
     );
   };
@@ -208,6 +267,158 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   const [search, setSearch] = useState("");
   const [colSearch, setColSearch] = useState("");
   const [showAllCols, setShowAllCols] = useState(false);
+
+  const renderMLWorkspace = () => {
+    const mlTargetInfo = data.ml_target || { possible_targets: [], recommended_target: "" };
+    const recommended = mlTargetInfo.recommended_target;
+    const currentTarget = selectedTarget || recommended || "";
+    
+    return (
+      <Box display="flex" flexDirection="column" gap={4} sx={{ animation: "fadeUp 0.3s ease both" }}>
+        <Box>
+          <SectionLabel icon="🤖">Machine Learning Workspace</SectionLabel>
+          <Grid container spacing={3}>
+            {/* Target Select Card */}
+            <Grid item xs={12} md={7}>
+              <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", p: 3, boxShadow: "0 2px 12px rgba(15,23,42,0.06)", height: "100%" }}>
+                <Typography variant="subtitle2" sx={{ fontFamily: font, fontWeight: 800, color: T.text, mb: 1 }}>
+                  ML Target Identification
+                </Typography>
+                <Typography sx={{ fontFamily: font, fontSize: "0.82rem", color: T.muted, mb: 3 }}>
+                  Select the column you want your machine learning model to predict. The system automatically inspects datatypes, cardinality, name semantics, and missing ratios to identify suitable candidates.
+                </Typography>
+
+                {recommended ? (
+                  <Box display="flex" flexDirection="column" gap={2}>
+                    <Box sx={{ p: 2, bgcolor: T.greenSoft, border: `1px solid ${T.green}40`, borderRadius: "12px", display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box sx={{ fontSize: "1.5rem", color: T.green }}>✓</Box>
+                      <Box>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.78rem", fontWeight: 700, color: T.green, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          Recommended Target
+                        </Typography>
+                        <Typography sx={{ fontFamily: mono, fontSize: "0.95rem", fontWeight: 700, color: T.text, mt: 0.5 }}>
+                          {recommended}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    
+                    {currentTarget !== recommended && (
+                      <Box sx={{ p: 2, bgcolor: T.warmSoft, border: `1px solid ${T.warm}40`, borderRadius: "12px", display: "flex", alignItems: "center", gap: 2 }}>
+                        <Box sx={{ fontSize: "1.5rem", color: T.warm }}>⚠</Box>
+                        <Box>
+                          <Typography sx={{ fontFamily: font, fontSize: "0.78rem", fontWeight: 700, color: T.warm, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                            Manual Override Active
+                          </Typography>
+                          <Typography sx={{ fontFamily: mono, fontSize: "0.95rem", fontWeight: 700, color: T.text, mt: 0.5 }}>
+                            Selected Target: {currentTarget}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  </Box>
+                ) : (
+                  <Alert severity="warning" sx={{ borderRadius: "12px", mb: 3 }}>
+                    No clear target variable detected automatically. Please select one manually below.
+                  </Alert>
+                )}
+
+                <Box sx={{ mt: 3 }}>
+                  <Typography sx={{ fontFamily: font, fontSize: "0.75rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: "0.05em", mb: 1 }}>
+                    Manually Override Target Variable
+                  </Typography>
+                  <FormControl size="small" fullWidth sx={{ maxWidth: 350 }}>
+                    <Select
+                      value={currentTarget}
+                      onChange={(e) => setSelectedTarget(e.target.value)}
+                      sx={{
+                        fontFamily: mono,
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        color: T.text,
+                        "& .MuiOutlinedInput-notchedOutline": { borderColor: T.border },
+                        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: T.accent },
+                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: T.accent }
+                      }}
+                    >
+                      <MenuItem value="" disabled sx={{ fontFamily: font, fontSize: "0.8rem" }}>
+                        -- Choose a column --
+                      </MenuItem>
+                      {data.column_names.map((col) => {
+                        const candidate = mlTargetInfo.possible_targets.find(t => t.column === col);
+                        const scoreText = candidate ? `(Score: ${candidate.score}%)` : "(Not recommended)";
+                        return (
+                          <MenuItem key={col} value={col} sx={{ fontFamily: mono, fontSize: "0.8rem" }}>
+                            {col} {scoreText}
+                          </MenuItem>
+                        );
+                      })}
+                    </Select>
+                  </FormControl>
+                </Box>
+              </Card>
+            </Grid>
+
+            {/* Candidates Summary Card */}
+            <Grid item xs={12} md={5}>
+              <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", p: 3, boxShadow: "0 2px 12px rgba(15,23,42,0.06)", height: "100%" }}>
+                <Typography variant="subtitle2" sx={{ fontFamily: font, fontWeight: 800, color: T.text, mb: 2 }}>
+                  Possible Target Columns ({mlTargetInfo.possible_targets.length})
+                </Typography>
+                
+                <Box display="flex" flexDirection="column" gap={1.5} sx={{ maxHeight: 280, overflowY: "auto", pr: 0.5 }}>
+                  {mlTargetInfo.possible_targets.map((cand) => {
+                    const isSelected = cand.column === currentTarget;
+                    const isRec = cand.column === recommended;
+                    return (
+                      <Box 
+                        key={cand.column}
+                        sx={{ 
+                          p: 1.5, 
+                          borderRadius: "12px", 
+                          bgcolor: isSelected ? T.accentSoft : T.faint, 
+                          border: `1px solid ${isSelected ? T.accent + "50" : T.border}`,
+                          transition: "all 0.15s"
+                        }}
+                      >
+                        <Box display="flex" justifyContent="space-between" alignItems="center">
+                          <Typography sx={{ fontFamily: mono, fontSize: "0.82rem", fontWeight: 700, color: isSelected ? T.accent : T.text }}>
+                            {cand.column}
+                          </Typography>
+                          <Box display="flex" gap={1} alignItems="center">
+                            {isRec && (
+                              <Box sx={{ px: 1, py: 0.25, bgcolor: T.greenSoft, border: `1px solid ${T.green}30`, borderRadius: "6px", fontFamily: font, fontSize: "0.55rem", fontWeight: 800, color: T.green, letterSpacing: "0.04em" }}>
+                                REC
+                              </Box>
+                            )}
+                            <Box sx={{ px: 1, py: 0.25, bgcolor: isSelected ? T.accentSoft : T.border, borderRadius: "6px", fontFamily: mono, fontSize: "0.55rem", fontWeight: 800, color: isSelected ? T.accent : T.muted }}>
+                              SCORE: {cand.score}%
+                            </Box>
+                          </Box>
+                        </Box>
+                        <Box display="flex" justifyContent="space-between" mt={1}>
+                          <Typography sx={{ fontFamily: font, fontSize: "0.68rem", color: T.muted }}>
+                            Type: <strong>{cand.dtype}</strong> &nbsp;·&nbsp; Uniques: <strong>{cand.unique_count}</strong>
+                          </Typography>
+                          <Typography sx={{ fontFamily: font, fontSize: "0.68rem", color: T.muted }}>
+                            Missing: <strong>{cand.missing_count}</strong>
+                          </Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                  {mlTargetInfo.possible_targets.length === 0 && (
+                    <Typography color="text.secondary" sx={{ fontStyle: "italic", fontSize: "0.8rem", textAlign: "center", py: 4 }}>
+                      No target candidates met confidence scoring threshold.
+                    </Typography>
+                  )}
+                </Box>
+              </Card>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    );
+  };
 
   if (!data) return null;
 
@@ -392,6 +603,7 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
           <Tab icon={<CleaningServicesIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Data Cleaning Engine" />
           <Tab icon={<BarChartIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Visualizations" />
           <Tab icon={<AutoAwesomeIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="AI Insights" />
+          <Tab icon={<AutoAwesomeIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Machine Learning" />
         </Tabs>
       </Box>
 
@@ -941,6 +1153,9 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
             )}
           </Box>
         )}
+
+        {/* ── TAB 4: MACHINE LEARNING WORKSPACE ── */}
+        {tabIndex === 4 && renderMLWorkspace()}
 
       </Box>
     </Box>
