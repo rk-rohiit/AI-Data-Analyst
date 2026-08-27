@@ -148,22 +148,22 @@ Build a robust dataset ingestion pipeline.
 
 ### Supported Files
 
-- [ ] CSV
-- [ ] TSV
-- [ ] Semicolon-separated files
-- [ ] Space-separated files where practical
+- [x] CSV
+- [x] TSV
+- [x] Semicolon-separated files
+- [x] Space-separated files where practical
 
 ### Tasks
 
-- [ ] Detect delimiter automatically.
-- [ ] Detect encoding where practical.
-- [ ] Validate file extension.
-- [ ] Validate MIME type.
-- [ ] Limit maximum file size.
-- [ ] Generate a unique dataset ID.
-- [ ] Store uploaded file temporarily.
-- [ ] Pass dataset to Python engine.
-- [ ] Return dataset metadata.
+- [x] Detect delimiter automatically.
+- [x] Detect encoding where practical.
+- [x] Validate file extension.
+- [x] Validate MIME type.
+- [x] Limit maximum file size.
+- [x] Generate a unique dataset ID.
+- [x] Store uploaded file temporarily.
+- [x] Pass dataset to Python engine.
+- [x] Return dataset metadata.
 
 ### Dataset Metadata
 
@@ -187,17 +187,17 @@ Automatically clean raw datasets.
 
 ### Tasks
 
-- [ ] Trim column names.
-- [ ] Trim string values.
-- [ ] Detect missing values.
-- [ ] Detect duplicate rows.
-- [ ] Remove or flag duplicate rows.
-- [ ] Detect numeric columns stored as strings.
-- [ ] Automatically coerce numeric columns.
-- [ ] Detect constant columns.
-- [ ] Detect empty columns.
-- [ ] Detect suspicious datatypes.
-- [ ] Preserve original dataset separately from cleaned dataset.
+- [x] Trim column names.
+- [x] Trim string values.
+- [x] Detect missing values.
+- [x] Detect duplicate rows.
+- [x] Remove or flag duplicate rows.
+- [x] Detect numeric columns stored as strings.
+- [x] Automatically coerce numeric columns.
+- [x] Detect constant columns.
+- [x] Detect empty columns.
+- [x] Detect suspicious datatypes.
+- [x] Preserve original dataset separately from cleaned dataset.
 
 ### Cleaning Report
 
@@ -227,12 +227,12 @@ ai/data_quality/
 
 ### Calculate
 
-- [ ] Missing-value score
-- [ ] Duplicate score
-- [ ] Datatype score
-- [ ] Outlier score
-- [ ] Consistency score
-- [ ] Cardinality warnings
+- [x] Missing-value score
+- [x] Duplicate score
+- [x] Datatype score
+- [x] Outlier score
+- [x] Consistency score
+- [x] Cardinality warnings
 
 ### Example
 
@@ -250,11 +250,11 @@ DATA QUALITY SCORE
 
 ### Tasks
 
-- [ ] Implement scoring algorithm.
-- [ ] Return score through API.
-- [ ] Create frontend quality card.
-- [ ] Show detailed quality issues.
-- [ ] Allow users to inspect problematic columns.
+- [x] Implement scoring algorithm.
+- [x] Return score through API.
+- [x] Create frontend quality card.
+- [x] Show detailed quality issues.
+- [x] Allow users to inspect problematic columns.
 
 ---
 

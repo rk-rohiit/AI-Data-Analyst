@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import path from "path";
+import fs from "fs";
 import { runPythonAnalysis } from "../services/pythonService.js";
 import { sendSuccess, sendError } from "../utils/apiResponse.js";
 
@@ -41,6 +43,24 @@ export const uploadFile = async (req, res, next) => {
       analysis,
     });
 
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/upload/download/:filename
+export const downloadFile = (req, res, next) => {
+  try {
+    const { filename } = req.params;
+    // Sanitization: prevent directory traversal by taking only base name
+    const safeFilename = path.basename(filename);
+    const filePath = path.resolve("uploads", safeFilename);
+
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: "File not found" });
+    }
+
+    res.download(filePath);
   } catch (error) {
     next(error);
   }

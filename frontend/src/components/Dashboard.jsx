@@ -1,6 +1,17 @@
-import { Grid, Typography, Box, TextField, InputAdornment, Button } from "@mui/material";
+import { Grid, Typography, Box, TextField, InputAdornment, Button, Tabs, Tab, Card, CardContent, Alert, AlertTitle, List, ListItem, ListItemIcon, ListItemText, Divider, CircularProgress } from "@mui/material";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
+import TableChartIcon from "@mui/icons-material/TableChart";
+import CleaningServicesIcon from "@mui/icons-material/CleaningServices";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import DownloadIcon from "@mui/icons-material/Download";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningIcon from "@mui/icons-material/Warning";
+import ErrorIcon from "@mui/icons-material/Error";
+import InfoIcon from "@mui/icons-material/Info";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
 import Charts from "../components/Charts";
 import Insights from "../components/Insights";
 import { useState } from "react";
@@ -46,6 +57,7 @@ const formatValue = (val) => {
 /* ─── Dashboard ──────────────────────────────────────────── */
 const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
   const T = getTokens(darkMode);
+  const [tabIndex, setTabIndex] = useState(0);
 
   /* ─── sub-components ─────────────────────────────────────── */
   const SectionLabel = ({ icon, children }) => (
@@ -165,9 +177,38 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
       </Box>
     );
   };
+
+  const SubScoreRow = ({ label, score }) => {
+    let iconColor = T.green;
+    let icon = "✓";
+    if (score < 60) {
+      iconColor = T.rose;
+      icon = "✗";
+    } else if (score < 85) {
+      iconColor = T.warm;
+      icon = "⚠";
+    }
+    return (
+      <Box display="flex" alignItems="center" justifyContent="space-between" py={1}>
+        <Box display="flex" alignItems="center" gap={1}>
+          <Typography sx={{ color: iconColor, fontWeight: 800, fontFamily: mono, fontSize: "0.95rem" }}>
+            {icon}
+          </Typography>
+          <Typography sx={{ fontFamily: font, fontSize: "0.78rem", fontWeight: 600, color: T.sub }}>
+            {label}
+          </Typography>
+        </Box>
+        <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", fontWeight: 700, color: T.text }}>
+          {score}%
+        </Typography>
+      </Box>
+    );
+  };
+
   const [search, setSearch] = useState("");
   const [colSearch, setColSearch] = useState("");
   const [showAllCols, setShowAllCols] = useState(false);
+
   if (!data) return null;
 
   const filteredPreview = data.preview?.filter((row) =>
@@ -178,6 +219,32 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
 
   const numericCols = Object.entries(data.summary).filter(([, s]) => s.mean !== "").length;
   const catCols = Object.entries(data.summary).length - numericCols;
+
+  // Extract cleaning report & quality score
+  const report = data.cleaning_report || {};
+  const qScore = data.quality_score || { overall_score: 100, missing_score: 100, duplicate_score: 100, datatype_score: 100, outlier_score: 100, consistency_score: 100, warnings: [] };
+  
+  const constantCols = report.constant_columns || [];
+  const emptyCols = report.empty_columns || [];
+  const suspiciousCols = Object.entries(report.suspicious_columns || {});
+  const trimmedCols = report.trimmed_columns || [];
+  const coercedCols = report.coerced_columns || [];
+  const filledSummary = Object.entries(report.filled_missing_summary || {});
+  const hasCleaningStats = !!report.rows_before;
+  const cleanedDownloadUrl = report.cleaned_filename 
+    ? `http://localhost:8080/api/upload/download/${report.cleaned_filename}` 
+    : "";
+
+  // Dynamic Gauge colors
+  let gaugeColor = T.green;
+  let statusText = "Healthy";
+  if (qScore.overall_score < 60) {
+    gaugeColor = T.rose;
+    statusText = "Poor Quality";
+  } else if (qScore.overall_score < 85) {
+    gaugeColor = T.warm;
+    statusText = "Fair Quality";
+  }
 
   return (
     <Box sx={{ bgcolor: T.bg, minHeight: "100vh", fontFamily: font, pb: 10 }}>
@@ -211,7 +278,6 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
           },
         }}
       >
-        {/* decorative circles */}
         <Box sx={{ position: "absolute", top: -60, right: -60, width: 280, height: 280, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.06)", pointerEvents: "none" }} />
         <Box sx={{ position: "absolute", bottom: -80, left: "30%", width: 200, height: 200, borderRadius: "50%", bgcolor: "rgba(255,255,255,0.04)", pointerEvents: "none" }} />
 
@@ -228,11 +294,18 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
               Dataset Dashboard
             </Typography>
             <Typography sx={{ fontFamily: mono, fontSize: "0.78rem", color: "rgba(255,255,255,0.65)" }}>
-              {(data.rows ?? 0).toLocaleString()} rows &nbsp;·&nbsp; {data.columns} columns &nbsp;·&nbsp; {numericCols} numeric &nbsp;·&nbsp; {catCols} categorical
+              {hasCleaningStats ? (
+                <>
+                  {(report.rows_before ?? 0).toLocaleString()} original rows &nbsp;·&nbsp; {(report.rows_after ?? 0).toLocaleString()} cleaned rows &nbsp;·&nbsp; {data.columns} columns
+                </>
+              ) : (
+                <>
+                  {(data.rows ?? 0).toLocaleString()} rows &nbsp;·&nbsp; {data.columns} columns &nbsp;·&nbsp; {numericCols} numeric &nbsp;·&nbsp; {catCols} categorical
+                </>
+              )}
             </Typography>
           </Box>
 
-          {/* Theme Switch Option */}
           {onToggleDarkMode && (
             <Box 
               sx={{ 
@@ -273,10 +346,10 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
       </Box>
 
       {/* ── STAT CARDS (overlap hero) ── */}
-      <Box px={{ xs: 2, md: 6 }} mt={-4} mb={5} sx={{ position: "relative", zIndex: 10 }}>
+      <Box px={{ xs: 2, md: 6 }} mt={-4} mb={4} sx={{ position: "relative", zIndex: 10 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={4}>
-            <StatCard title="Total Rows" value={(data.rows ?? 0).toLocaleString()} color={T.accent} softColor={T.accentSoft} icon="⊞" />
+            <StatCard title="Cleaned Rows" value={hasCleaningStats ? (report.rows_after ?? 0).toLocaleString() : (data.rows ?? 0).toLocaleString()} color={T.accent} softColor={T.accentSoft} icon="⊞" />
           </Grid>
           <Grid item xs={12} sm={4}>
             <StatCard title="Total Columns" value={data.columns} color={T.sky} softColor={T.skySoft} icon="⊟" />
@@ -287,236 +360,588 @@ const Dashboard = ({ data, darkMode, onToggleDarkMode }) => {
         </Grid>
       </Box>
 
-      {/* ── MAIN BODY ── */}
+      {/* ── TABS NAVIGATION ── */}
+      <Box sx={{ borderBottom: `1px solid ${T.border}`, bgcolor: T.surface, px: { xs: 2, md: 6 }, mb: 4 }}>
+        <Tabs
+          value={tabIndex}
+          onChange={(e, newIndex) => setTabIndex(newIndex)}
+          variant="scrollable"
+          scrollButtons="auto"
+          sx={{
+            "& .MuiTab-root": {
+              fontFamily: font,
+              fontWeight: 700,
+              fontSize: "0.82rem",
+              textTransform: "none",
+              minHeight: 52,
+              px: 3,
+              color: T.muted,
+              transition: "color 0.2s",
+              "&.Mui-selected": {
+                color: T.accent,
+              },
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: T.accent,
+              height: "3px",
+              borderRadius: "3px 3px 0 0",
+            },
+          }}
+        >
+          <Tab icon={<TableChartIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Overview & Preview" />
+          <Tab icon={<CleaningServicesIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Data Cleaning Engine" />
+          <Tab icon={<BarChartIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="Visualizations" />
+          <Tab icon={<AutoAwesomeIcon sx={{ fontSize: "1.1rem" }} />} iconPosition="start" label="AI Insights" />
+        </Tabs>
+      </Box>
+
+      {/* ── TABS CONTENT WORKSPACE ── */}
       <Box px={{ xs: 2, md: 6 }}>
-        <Grid container spacing={{ xs: 2, md: 4 }}>
-          
-          {/* LEFT COLUMN: Data Preview & Column Analysis */}
-          <Grid item xs={12} lg={7}>
-            <Box display="flex" flexDirection="column" gap={4}>
-              
-              {/* DATA PREVIEW */}
-              {data.preview && (
-                <Box>
-                  <SectionLabel icon="🗂">Data Preview</SectionLabel>
+        
+        {/* ── TAB 0: OVERVIEW & PREVIEW ── */}
+        {tabIndex === 0 && (
+          <Grid container spacing={3} sx={{ animation: "fadeUp 0.3s ease both" }}>
+            
+            {/* MAIN MAIN CONTENT: Data Preview & Column Analysis */}
+            <Grid item xs={12} md={8.3}>
+              <Box display="flex" flexDirection="column" gap={4}>
+                
+                {/* DATA PREVIEW */}
+                {data.preview && (
+                  <Box>
+                    <SectionLabel icon="🗂">Data Preview</SectionLabel>
 
-                  <TextField
-                    placeholder="Filter rows…"
-                    size="small"
-                    fullWidth
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Typography sx={{ fontFamily: mono, fontSize: "1rem", color: T.muted, lineHeight: 1 }}>⌕</Typography>
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{
-                      mb: 2,
-                      "& .MuiOutlinedInput-root": {
-                        bgcolor: T.surface,
-                        borderRadius: "10px",
-                        fontFamily: mono,
-                        fontSize: "0.82rem",
-                        "& fieldset": { borderColor: T.border },
-                        "&:hover fieldset": { borderColor: T.borderStrong },
-                        "&.Mui-focused fieldset": { borderColor: T.accent },
-                      },
-                    }}
-                  />
+                    <TextField
+                      placeholder="Filter rows…"
+                      size="small"
+                      fullWidth
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            <Typography sx={{ fontFamily: mono, fontSize: "1rem", color: T.muted, lineHeight: 1 }}>⌕</Typography>
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{
+                        mb: 2,
+                        "& .MuiOutlinedInput-root": {
+                          bgcolor: T.surface,
+                          borderRadius: "10px",
+                          fontFamily: mono,
+                          fontSize: "0.82rem",
+                          "& fieldset": { borderColor: T.border },
+                          "&:hover fieldset": { borderColor: T.borderStrong },
+                          "&.Mui-focused fieldset": { borderColor: T.accent },
+                        },
+                      }}
+                    />
 
-                  <Box sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 8px rgba(15,23,42,0.06)" }}>
-                    <Box sx={{ overflowX: "auto", maxHeight: 360, overflowY: "auto" }}>
-                      <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: mono, fontSize: "0.78rem" }}>
-                        <thead>
-                          <tr>
-                            {data.column_names.map((col) => (
-                              <th key={col} style={{ padding: "11px 16px", background: T.accentSoft, color: T.accent, textAlign: "left", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap", position: "sticky", top: 0, zIndex: 1, borderBottom: `1px solid ${T.borderStrong}` }}>
-                                {col}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(filteredPreview ?? []).map((row, i) => (
-                            <tr
-                              key={i}
-                              style={{ background: i % 2 === 0 ? T.surface : T.faint, borderBottom: `1px solid ${T.border}`, transition: "background 0.1s" }}
-                              onMouseEnter={(e) => (e.currentTarget.style.background = T.accentSoft)}
-                              onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? T.surface : T.faint)}
-                            >
+                    <Box sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "14px", overflow: "hidden", boxShadow: "0 2px 8px rgba(15,23,42,0.06)" }}>
+                      <Box sx={{ overflowX: "auto", maxHeight: 360, overflowY: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: mono, fontSize: "0.78rem" }}>
+                          <thead>
+                            <tr>
                               {data.column_names.map((col) => (
-                                <td key={col} style={{ padding: "9px 16px", color: T.sub, whiteSpace: "nowrap", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
-                                  {row[col]}
-                                </td>
+                                <th key={col} style={{ padding: "11px 16px", background: T.accentSoft, color: T.accent, textAlign: "left", fontWeight: 600, fontSize: "0.6rem", letterSpacing: "0.12em", textTransform: "uppercase", whiteSpace: "nowrap", position: "sticky", top: 0, zIndex: 1, borderBottom: `1px solid ${T.borderStrong}` }}>
+                                  {col}
+                                </th>
                               ))}
                             </tr>
-                          ))}
-                          {filteredPreview?.length === 0 && (
-                            <tr>
-                              <td colSpan={data.column_names.length} style={{ padding: "36px", textAlign: "center", color: T.muted, fontFamily: mono, fontSize: "0.8rem" }}>
-                                No rows match "{search}"
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            {(filteredPreview ?? []).map((row, i) => (
+                              <tr
+                                key={i}
+                                style={{ background: i % 2 === 0 ? T.surface : T.faint, borderBottom: `1px solid ${T.border}`, transition: "background 0.1s" }}
+                                onMouseEnter={(e) => (e.currentTarget.style.background = T.accentSoft)}
+                                onMouseLeave={(e) => (e.currentTarget.style.background = i % 2 === 0 ? T.surface : T.faint)}
+                              >
+                                {data.column_names.map((col) => (
+                                  <td key={col} style={{ padding: "9px 16px", color: T.sub, whiteSpace: "nowrap", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis" }}>
+                                    {row[col]}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                            {filteredPreview?.length === 0 && (
+                              <tr>
+                                <td colSpan={data.column_names.length} style={{ padding: "36px", textAlign: "center", color: T.muted, fontFamily: mono, fontSize: "0.8rem" }}>
+                                  No rows match "{search}"
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </Box>
+                      <Box sx={{ px: 2.5, py: 1, borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", bgcolor: T.faint }}>
+                        <Typography sx={{ fontFamily: mono, fontSize: "0.6rem", color: T.muted }}>
+                          {filteredPreview?.length ?? 0} / {data.preview.length} rows
+                        </Typography>
+                      </Box>
                     </Box>
-                    <Box sx={{ px: 2.5, py: 1, borderTop: `1px solid ${T.border}`, display: "flex", justifyContent: "flex-end", bgcolor: T.faint }}>
-                      <Typography sx={{ fontFamily: mono, fontSize: "0.6rem", color: T.muted }}>
-                        {filteredPreview?.length ?? 0} / {data.preview.length} rows
+                  </Box>
+                )}
+
+                {/* COLUMN ANALYSIS */}
+                <Box>
+                  <SectionLabel icon="📐">Column Analysis</SectionLabel>
+                  
+                  {Object.keys(data.summary).length > 6 && (
+                    <Typography sx={{ display: "none" }} /> // Spacer or placeholder
+                  )}
+
+                  {(() => {
+                    const filteredSummary = Object.entries(data.summary).filter(([col]) =>
+                      col.toLowerCase().includes(colSearch.toLowerCase())
+                    );
+
+                    return (
+                      <Box>
+                        <Grid container spacing={2}>
+                          {filteredSummary
+                            .slice(0, showAllCols ? undefined : 6)
+                            .map(([col, stats]) => (
+                              <Grid item xs={12} sm={6} key={col}>
+                                <ColumnCard col={col} stats={stats} />
+                              </Grid>
+                            ))}
+                        </Grid>
+
+                        {filteredSummary.length > 6 && (
+                          <Box display="flex" justifyContent="center" mt={3}>
+                            <Button
+                              variant="outlined"
+                              size="small"
+                              onClick={() => setShowAllCols(!showAllCols)}
+                              sx={{
+                                fontFamily: font,
+                                fontWeight: 700,
+                                textTransform: "none",
+                                color: T.accent,
+                                borderColor: T.accent,
+                                borderRadius: "8px",
+                                px: 3,
+                                py: 0.8,
+                                "&:hover": {
+                                  borderColor: T.accentMid,
+                                  bgcolor: T.accentSoft,
+                                }
+                              }}
+                            >
+                              {showAllCols ? "Show Less" : `Show All (${filteredSummary.length} columns)`}
+                            </Button>
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })()}
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* SIDEBAR: STICKY DATA QUALITY SCORE GAUGE */}
+            <Grid item xs={12} md={3.7}>
+              <Card sx={{ 
+                bgcolor: T.surface, 
+                border: `1px solid ${T.border}`, 
+                borderRadius: "18px", 
+                p: 3.5, 
+                position: "sticky", 
+                top: 88,
+                boxShadow: "0 4px 18px rgba(15,23,42,0.04)"
+              }}>
+                <Typography sx={{ fontFamily: font, fontWeight: 800, fontSize: "0.95rem", color: T.text, mb: 3 }}>
+                  Data Health Index
+                </Typography>
+
+                {/* Circular Gauge */}
+                <Box display="flex" flexDirection="column" alignItems="center" mb={4}>
+                  <Box position="relative" display="inline-flex" justifyContent="center" alignItems="center" mb={2}>
+                    <CircularProgress
+                      variant="determinate"
+                      value={qScore.overall_score}
+                      size={110}
+                      thickness={5.5}
+                      sx={{ 
+                        color: gaugeColor,
+                        "& .MuiCircularProgress-circle": { strokeLinecap: "round" }
+                      }}
+                    />
+                    <Box
+                      position="absolute"
+                      display="flex"
+                      flexDirection="column"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <Typography variant="h4" sx={{ fontWeight: 800, fontFamily: mono, color: T.text, lineHeight: 1 }}>
+                        {qScore.overall_score}
+                      </Typography>
+                      <Typography sx={{ fontSize: "0.52rem", fontWeight: 700, fontFamily: font, color: T.muted, textTransform: "uppercase", mt: 0.25, letterSpacing: "0.08em" }}>
+                        GRADE
                       </Typography>
                     </Box>
                   </Box>
+                  
+                  <Box sx={{ px: 1.5, py: 0.4, borderRadius: "6px", bgcolor: `${gaugeColor}15`, border: `1px solid ${gaugeColor}30` }}>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.68rem", fontWeight: 700, color: gaugeColor, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                      {statusText}
+                    </Typography>
+                  </Box>
                 </Box>
-              )}
 
-              {/* COLUMN ANALYSIS */}
-              <Box>
-                <SectionLabel icon="📐">Column Analysis</SectionLabel>
-                
-                {Object.keys(data.summary).length > 6 && (
-                  <TextField
-                    placeholder="Search columns…"
-                    size="small"
-                    fullWidth
-                    value={colSearch}
-                    onChange={(e) => setColSearch(e.target.value)}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <Typography sx={{ fontFamily: mono, fontSize: "1rem", color: T.muted, lineHeight: 1 }}>⌕</Typography>
-                        </InputAdornment>
-                      ),
-                    }}
-                    sx={{
-                      mb: 2.5,
-                      "& .MuiOutlinedInput-root": {
-                        bgcolor: T.surface,
-                        borderRadius: "10px",
-                        fontFamily: mono,
-                        fontSize: "0.82rem",
-                        "& fieldset": { borderColor: T.border },
-                        "&:hover fieldset": { borderColor: T.borderStrong },
-                        "&.Mui-focused fieldset": { borderColor: T.accent },
-                      },
-                    }}
-                  />
+                <Divider sx={{ borderColor: T.border, mb: 3 }} />
+
+                {/* Sub Scores list Checklist */}
+                <Typography sx={{ fontFamily: font, fontSize: "0.72rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", mb: 1.5, letterSpacing: "0.05em" }}>
+                  Dataset Diagnostics
+                </Typography>
+
+                <Box display="flex" flexDirection="column" gap={0.5}>
+                  <SubScoreRow label="Populated Cells (Non-Null)" score={qScore.missing_score} />
+                  <SubScoreRow label="Unique Rows (Non-Duplicates)" score={qScore.duplicate_score} />
+                  <SubScoreRow label="Datatype Cleanliness" score={qScore.datatype_score} />
+                  <SubScoreRow label="Distribution Consistency" score={qScore.consistency_score} />
+                  <SubScoreRow label="Statistical Outliers Audit" score={qScore.outlier_score} />
+                </Box>
+
+                {/* Scorer Warnings List */}
+                {qScore.warnings && qScore.warnings.length > 0 && (
+                  <Box mt={3.5}>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.72rem", fontWeight: 700, color: T.muted, textTransform: "uppercase", mb: 1.5, letterSpacing: "0.05em" }}>
+                      Audit Details ({qScore.warnings.length})
+                    </Typography>
+                    <Box sx={{ maxHeight: 160, overflowY: "auto", pr: 0.5, display: "flex", flexDirection: "column", gap: 1.2 }}>
+                      {qScore.warnings.map((w, idx) => {
+                        let badgeColor = T.green;
+                        if (w.severity === "high") badgeColor = T.rose;
+                        else if (w.severity === "medium") badgeColor = T.warm;
+                        else badgeColor = T.sky;
+                        return (
+                          <Box key={idx} sx={{ p: 1.2, bgcolor: T.faint, borderRadius: "10px", borderLeft: `3px solid ${badgeColor}` }}>
+                            <Typography sx={{ fontFamily: font, fontSize: "0.7rem", color: T.sub, lineHeight: 1.45 }}>
+                              {w.message}
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                )}
+              </Card>
+            </Grid>
+          </Grid>
+        )}
+
+        {/* ── TAB 1: DATA CLEANING ENGINE ── */}
+        {tabIndex === 1 && (
+          <Box display="flex" flexDirection="column" gap={4} sx={{ animation: "fadeUp 0.3s ease both" }}>
+            
+            {hasCleaningStats ? (
+              <>
+                {/* A. Statistics Cards Grid */}
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={4}>
+                    <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", boxShadow: "none" }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                          <TableChartIcon sx={{ color: T.accent }} />
+                          <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.muted }}>
+                            Rows Comparison
+                          </Typography>
+                        </Box>
+                        <Box display="flex" alignItems="center" gap={1.5} my={1.5}>
+                          <Typography variant="h5" sx={{ fontFamily: mono, fontWeight: 800, color: T.text }}>
+                            {report.rows_before}
+                          </Typography>
+                          <ArrowForwardIcon sx={{ color: T.muted, fontSize: "1.1rem" }} />
+                          <Typography variant="h5" sx={{ fontFamily: mono, fontWeight: 800, color: T.green }}>
+                            {report.rows_after}
+                          </Typography>
+                        </Box>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.74rem", color: T.muted }}>
+                          Dropped {report.rows_before - report.rows_after} row(s) containing duplicates or issues.
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", boxShadow: "none" }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                          <CleaningServicesIcon sx={{ color: T.sky }} />
+                          <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.muted }}>
+                            Null Values Handled
+                          </Typography>
+                        </Box>
+                        <Typography variant="h5" sx={{ fontFamily: mono, fontWeight: 800, color: report.total_missing_before > 0 ? T.warm : T.green, my: 1.5 }}>
+                          {report.total_missing_before} nulls ({report.missing_percentage}%)
+                        </Typography>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.74rem", color: T.muted }}>
+                          Automatically imputed using mathematical statistics (Mean/Mode).
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+
+                  <Grid item xs={12} sm={4}>
+                    <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", boxShadow: "none" }}>
+                      <CardContent sx={{ p: 3 }}>
+                        <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                          <CheckCircleIcon sx={{ color: T.green }} />
+                          <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.muted }}>
+                            Cleaned Schema Audit
+                          </Typography>
+                        </Box>
+                        <Typography variant="h5" sx={{ fontFamily: mono, fontWeight: 800, color: T.text, my: 1.5 }}>
+                          {report.numeric_columns_detected} Num / {report.categorical_columns_detected} Cat
+                        </Typography>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.74rem", color: T.muted }}>
+                          All whitespace trimmed. Standardized text encodings resolved.
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                </Grid>
+
+                {/* B. Warnings and Critical Data Quality Items */}
+                {(constantCols.length > 0 || emptyCols.length > 0 || suspiciousCols.length > 0) && (
+                  <Box>
+                    <SectionLabel icon="⚠️">Integrity Alerts</SectionLabel>
+                    
+                    {constantCols.length > 0 && (
+                      <Alert icon={<WarningIcon />} severity="warning" variant="outlined" sx={{ borderRadius: "12px", mb: 2, bgcolor: darkMode ? "rgba(245, 158, 11, 0.04)" : "#fffbeb", borderColor: `${T.warm}40`, color: T.text }}>
+                        <AlertTitle sx={{ fontFamily: font, fontWeight: 700 }}>Constant Columns Detected</AlertTitle>
+                        The following columns contain only a single value across the entire dataset: <strong>{constantCols.join(", ")}</strong>. These columns provide no mathematical variance for modeling.
+                      </Alert>
+                    )}
+
+                    {emptyCols.length > 0 && (
+                      <Alert icon={<ErrorIcon />} severity="error" variant="outlined" sx={{ borderRadius: "12px", mb: 2, bgcolor: darkMode ? "rgba(244, 63, 94, 0.04)" : "#fff5f5", borderColor: `${T.rose}40`, color: T.text }}>
+                        <AlertTitle sx={{ fontFamily: font, fontWeight: 700 }}>Empty Columns Detected</AlertTitle>
+                        The following columns are completely empty (all rows are null/missing): <strong>{emptyCols.join(", ")}</strong>.
+                      </Alert>
+                    )}
+
+                    {suspiciousCols.length > 0 && (
+                      <Alert icon={<InfoIcon />} severity="info" variant="outlined" sx={{ borderRadius: "12px", mb: 2, bgcolor: darkMode ? "rgba(14, 165, 233, 0.04)" : "#f0f9ff", borderColor: `${T.sky}40`, color: T.text }}>
+                        <AlertTitle sx={{ fontFamily: font, fontWeight: 700 }}>Suspicious Datatypes Flagged</AlertTitle>
+                        <Box component="ul" sx={{ m: 0, pl: 2, fontFamily: font, fontSize: "0.82rem" }}>
+                          {suspiciousCols.map(([col, reason]) => (
+                            <li key={col}>
+                              <strong>{col}</strong>: {reason}
+                            </li>
+                          ))}
+                        </Box>
+                      </Alert>
+                    )}
+                  </Box>
                 )}
 
-                {(() => {
-                  const filteredSummary = Object.entries(data.summary).filter(([col]) =>
-                    col.toLowerCase().includes(colSearch.toLowerCase())
-                  );
+                {/* C. Modification Log details */}
+                <Box>
+                  <SectionLabel icon="📋">Engine Processing Logs</SectionLabel>
+                  <Card sx={{ bgcolor: T.surface, border: `1px solid ${T.border}`, borderRadius: "16px", boxShadow: "none" }}>
+                    <CardContent sx={{ p: 0 }}>
+                      <List sx={{ p: 0 }}>
+                        
+                        {/* Trim logs */}
+                        <ListItem sx={{ py: 2.5, px: 3 }}>
+                          <ListItemIcon sx={{ minWidth: 40 }}><CheckCircleIcon sx={{ color: T.green, fontSize: "1.2rem" }} /></ListItemIcon>
+                          <ListItemText 
+                            primary={
+                              <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.text }}>
+                                Cell & Header Sanitization
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography sx={{ fontFamily: font, fontSize: "0.78rem", color: T.muted, mt: 0.5 }}>
+                                {trimmedCols.length > 0 ? (
+                                  <>Stripped leading and trailing whitespace characters from column headers or generic text cells: <strong>{trimmedCols.join(", ")}</strong>.</>
+                                ) : (
+                                  <>Headers and generic text values were already cleanly trimmed.</>
+                                )}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                        <Divider sx={{ borderColor: T.border }} />
 
-                  return (
-                    <Box>
-                      <Grid container spacing={2}>
-                        {filteredSummary
-                          .slice(0, showAllCols ? undefined : 6)
-                          .map(([col, stats]) => (
-                            <Grid item xs={12} sm={6} key={col}>
-                              <ColumnCard col={col} stats={stats} />
-                            </Grid>
-                          ))}
-                      </Grid>
+                        {/* Coerce logs */}
+                        <ListItem sx={{ py: 2.5, px: 3 }}>
+                          <ListItemIcon sx={{ minWidth: 40 }}><CheckCircleIcon sx={{ color: T.green, fontSize: "1.2rem" }} /></ListItemIcon>
+                          <ListItemText 
+                            primary={
+                              <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.text }}>
+                                Datatype Coercion
+                              </Typography>
+                            }
+                            secondary={
+                              <Typography sx={{ fontFamily: font, fontSize: "0.78rem", color: T.muted, mt: 0.5 }}>
+                                {coercedCols.length > 0 ? (
+                                  <>Automatically converted generic text columns containing number characters into true numeric datatypes (since &ge;80% values were numbers): <strong>{coercedCols.join(", ")}</strong>.</>
+                                ) : (
+                                  <>No text columns were identified as qualifying for numeric coercion (requires &ge;80% numeric strings).</>
+                                )}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                        <Divider sx={{ borderColor: T.border }} />
 
-                      {filteredSummary.length > 6 && (
-                        <Box display="flex" justifyContent="center" mt={3}>
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={() => setShowAllCols(!showAllCols)}
-                            sx={{
-                              fontFamily: font,
-                              fontWeight: 700,
-                              textTransform: "none",
-                              color: T.accent,
-                              borderColor: T.accent,
-                              borderRadius: "8px",
-                              px: 3,
-                              py: 0.8,
-                              "&:hover": {
-                                borderColor: T.accentMid,
-                                bgcolor: T.accentSoft,
-                              }
-                            }}
-                          >
-                            {showAllCols ? "Show Less" : `Show All (${filteredSummary.length} columns)`}
-                          </Button>
-                        </Box>
-                      )}
+                        {/* Missing values logs */}
+                        <ListItem sx={{ py: 2.5, px: 3 }}>
+                          <ListItemIcon sx={{ minWidth: 40 }}><CheckCircleIcon sx={{ color: T.green, fontSize: "1.2rem" }} /></ListItemIcon>
+                          <ListItemText 
+                            primary={
+                              <Typography sx={{ fontFamily: font, fontWeight: 700, fontSize: "0.85rem", color: T.text }}>
+                                Missing Values Imputation
+                              </Typography>
+                            }
+                            secondary={
+                              <Box sx={{ mt: 0.5 }}>
+                                {filledSummary.length > 0 ? (
+                                  <Box display="flex" flexDirection="column" gap={0.5}>
+                                    {filledSummary.map(([col, action]) => (
+                                      <Typography key={col} sx={{ fontFamily: font, fontSize: "0.78rem", color: T.muted }}>
+                                        · <strong>{col}</strong>: {action}
+                                      </Typography>
+                                    ))}
+                                  </Box>
+                                ) : (
+                                  <Typography sx={{ fontFamily: font, fontSize: "0.78rem", color: T.muted }}>
+                                    No missing null values found in the uploaded dataset.
+                                  </Typography>
+                                )}
+                              </Box>
+                            }
+                          />
+                        </ListItem>
+                      </List>
+                    </CardContent>
+                  </Card>
+                </Box>
 
-                      {filteredSummary.length === 0 && (
-                        <Typography variant="body2" sx={{ fontFamily: mono, color: T.muted, textAlign: "center", py: 3 }}>
-                          No columns match "{colSearch}"
-                        </Typography>
-                      )}
-                    </Box>
-                  );
-                })()}
+                {/* D. Preserved Raw dataset separate & download cleaned dataset */}
+                <Box sx={{ mt: 2 }}>
+                  <Card sx={{ 
+                    bgcolor: T.accentSoft, 
+                    border: `1px solid ${T.accent}30`, 
+                    borderRadius: "16px", 
+                    boxShadow: "none",
+                    p: 4,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center"
+                  }}>
+                    <DownloadIcon sx={{ color: T.accent, fontSize: "2.4rem", mb: 1.5 }} />
+                    <Typography sx={{ fontFamily: font, fontWeight: 800, fontSize: "1.1rem", color: T.text, mb: 1 }}>
+                      Cleaned Dataset Ready
+                    </Typography>
+                    <Typography sx={{ fontFamily: font, fontSize: "0.82rem", color: T.sub, maxWidth: 600, mb: 3 }}>
+                      The system successfully processed your data and saved a cleaned file in the platform's workspace uploads. Your original file has been preserved untouched separately. Click below to download the cleaned copy.
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      startIcon={<DownloadIcon />}
+                      size="large"
+                      href={cleanedDownloadUrl}
+                      disabled={!cleanedDownloadUrl}
+                      target="_blank"
+                      sx={{
+                        background: `linear-gradient(135deg, ${T.accent} 0%, ${T.accentMid} 100%)`,
+                        fontWeight: 700,
+                        fontFamily: font,
+                        textTransform: "none",
+                        borderRadius: "12px",
+                        px: 4,
+                        py: 1.5,
+                        boxShadow: `0 8px 20px ${T.accent}40`,
+                        "&:hover": {
+                          background: `linear-gradient(135deg, ${T.accent} 20%, #a20027 100%)`,
+                          boxShadow: `0 10px 24px ${T.accent}60`,
+                        }
+                      }}
+                    >
+                      Download Cleaned Dataset (CSV)
+                    </Button>
+                  </Card>
+                </Box>
+              </>
+            ) : (
+              <Box py={6} textAlign="center">
+                <CleaningServicesIcon sx={{ color: T.muted, fontSize: "3rem", mb: 2 }} />
+                <Typography sx={{ fontFamily: font, fontWeight: 700, color: T.text, mb: 1 }}>
+                  No Cleaning Metrics Found
+                </Typography>
+                <Typography sx={{ fontFamily: font, fontSize: "0.82rem", color: T.muted }}>
+                  The dataset metadata does not contain a cleaning report. Please re-upload your file to generate cleaning diagnostics.
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* ── TAB 2: VISUALIZATIONS ── */}
+        {tabIndex === 2 && (
+          <Box display="flex" flexDirection="column" gap={4} sx={{ animation: "fadeUp 0.3s ease both" }}>
+            <Box>
+              <SectionLabel icon="📊">Visualizations Dashboard</SectionLabel>
+              <Box
+                sx={{
+                  bgcolor: T.surface,
+                  border: `1px solid ${T.border}`,
+                  borderRadius: "16px",
+                  p: { xs: 2, md: 4 },
+                  boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
+                  width: "100%",
+                }}
+              >
+                <Charts charts={data.charts} darkMode={darkMode} />
               </Box>
             </Box>
-          </Grid>
+          </Box>
+        )}
 
-          {/* RIGHT COLUMN: Visualizations & AI Insights */}
-          <Grid item xs={12} lg={5}>
-            <Box display="flex" flexDirection="column" gap={4}>
-              
-              {/* VISUALIZATIONS */}
+        {/* ── TAB 3: AI INSIGHTS ── */}
+        {tabIndex === 3 && (
+          <Box display="flex" flexDirection="column" gap={4} sx={{ animation: "fadeUp 0.3s ease both" }}>
+            {data.insights && (
               <Box>
-                <SectionLabel icon="📊">Visualizations</SectionLabel>
+                <SectionLabel icon="🪄">AI-Generated Analysis Insights</SectionLabel>
                 <Box
                   sx={{
                     bgcolor: T.surface,
                     border: `1px solid ${T.border}`,
                     borderRadius: "16px",
-                    p: { xs: 2, md: 3 },
+                    overflow: "hidden",
                     boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
-                    width: "100%",
                   }}
                 >
-                  <Charts charts={data.charts} darkMode={darkMode} />
-                </Box>
-              </Box>
-
-              {/* AI INSIGHTS */}
-              {data.insights && (
-                <Box>
-                  <SectionLabel icon="🪄">AI Insights</SectionLabel>
-                  <Box
-                    sx={{
-                      bgcolor: T.surface,
-                      border: `1px solid ${T.border}`,
-                      borderRadius: "16px",
-                      overflow: "hidden",
-                      boxShadow: "0 2px 12px rgba(15,23,42,0.07)",
-                    }}
-                  >
-                    <Box sx={{ height: 3, background: `linear-gradient(90deg, ${T.accent}, ${T.accentMid}, #a78bfa)` }} />
-                    <Box sx={{ p: { xs: 2.5, md: 3 } }}>
-                      <Box display="flex" alignItems="center" gap={1} mb={2.5}>
-                        <Box sx={{ width: 32, height: 32, borderRadius: "10px", background: `linear-gradient(135deg, ${T.accent}, #7c3aed)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
-                          ✦
-                        </Box>
-                        <Box>
-                          <Typography sx={{ fontFamily: font, fontSize: "0.82rem", fontWeight: 700, color: T.text }}>
-                            AI-Generated Analysis
-                          </Typography>
-                        </Box>
+                  <Box sx={{ height: 3, background: `linear-gradient(90deg, ${T.accent}, ${T.accentMid}, #a78bfa)` }} />
+                  <Box sx={{ p: { xs: 3, md: 4 } }}>
+                    <Box display="flex" alignItems="center" gap={1.5} mb={3}>
+                      <Box sx={{ width: 32, height: 32, borderRadius: "10px", background: `linear-gradient(135deg, ${T.accent}, #7c3aed)`, display: "flex", alignItems: "center", justifyContent: "center", color: "#fff" }}>
+                        ✦
                       </Box>
-                      <Insights insights={data.insights} darkMode={darkMode} />
+                      <Box>
+                        <Typography sx={{ fontFamily: font, fontSize: "0.85rem", fontWeight: 700, color: T.text }}>
+                          Statistical Intelligence Report
+                        </Typography>
+                      </Box>
                     </Box>
+                    <Insights insights={data.insights} darkMode={darkMode} />
                   </Box>
                 </Box>
-              )}
+              </Box>
+            )}
+          </Box>
+        )}
 
-            </Box>
-          </Grid>
-          
-        </Grid>
       </Box>
     </Box>
   );
